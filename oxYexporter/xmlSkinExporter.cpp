@@ -60,7 +60,7 @@ IXMLDOMElement* insertObjectTMforSkin(IXMLDOMElement* skinNode, Matrix3 theObjec
 	return theObjectTMElement;
 }
 
-IXMLDOMElement* insertBoneForSkin(IXMLDOMElement* skinNode, TCHAR* boneName, int boneIndex){
+IXMLDOMElement* insertBoneForSkin(IXMLDOMElement* skinNode, _TCHAR* boneName, int boneIndex){
 	IXMLDOMDocument3* theDocument = NULL;
 	IXMLDOMNode* theBonesNode = NULL;
 	HRESULT hr = S_OK;

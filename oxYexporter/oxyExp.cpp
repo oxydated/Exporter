@@ -63,13 +63,13 @@ unsigned int oxyExp::Version(){
 }
 	
 void oxyExp::ShowAbout(HWND hWnd){
-	MessageBox( hWnd, (LPCSTR)L"oxYde exporter", (LPCSTR)L"oxyExporter", MB_OK );
+	MessageBox( hWnd, (LPCWSTR)L"oxYde exporter", (LPCWSTR)L"oxyExporter", MB_OK );
 }
 	
 int oxyExp::DoExport( const MCHAR *name, ExpInterface *ei, Interface *i, BOOL suppressPrompts, DWORD options){
 	FILE* expFile = fopen( "debug.yxo", "w");
 	if(expFile != NULL){
-		DebugPrint("It worked so far...\n");
+		DebugPrint(L"It worked so far...\n");
 		INode* rootNode = i->GetRootNode();
 		visitNodes(rootNode, i->GetTime(), expFile );
 		closeFile(name);

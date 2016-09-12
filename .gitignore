@@ -4,3 +4,5 @@ oxYexporter.sdf
 oxYexporter/x64/
 oxYexporter/oxYexporter.vcxproj
 oxYexporter/oxYexporter.vcxproj.filters
+*.db
+*.opendb

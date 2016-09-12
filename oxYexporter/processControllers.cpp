@@ -3,7 +3,7 @@
 #include "ikctrl.h"
 #include <maxscript/foundation/numbers.h>
 
-static char theString[100] = "";
+static _TCHAR theString[100] = TEXT("");
 static int indent = 1;
 
 using namespace std;
@@ -23,7 +23,7 @@ void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* the
 		theBipMaster = (IBipMaster12*)theTMControl->GetInterface(IBipMaster12::I_BIPMASTER12);
 		if (theBipMaster != NULL){
 			++indent;
-			DebugPrint("%*sit's a IBipMaster12\n", indent, " ");
+			DebugPrint(L"%*sit's a IBipMaster12\n", indent, " ");
 			++indent;
 			processBipedControl(theTMControl, theNode, theBipMaster, expFile, theAnimationElement);
 
@@ -34,20 +34,20 @@ void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* the
 		///////////////////////
 		visitController(theNode, theTMControl, expFile, theAnimationElement);
 
-		DebugPrint("%*sParent Node TM for node %s\n", indent, " ", theNode->GetName());
+		DebugPrint(L"%*sParent Node TM for node %s\n", indent, " ", theNode->GetName());
 		Matrix3 theMatrix = theNode->GetParentTM(0);
-		DebugPrint("%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-		DebugPrint("%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-		DebugPrint("%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-		DebugPrint("%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+		DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
+		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
+		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
+		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 	} else {
-		DebugPrint("%*sNo Control for node %s\n", indent, " ", theNode->GetName());
+		DebugPrint(L"%*sNo Control for node %s\n", indent, " ", theNode->GetName());
 		Matrix3 theMatrix = theNode->GetNodeTM(0);
-		DebugPrint("%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-		DebugPrint("%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-		DebugPrint("%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-		DebugPrint("%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+		DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
+		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
+		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
+		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 	}
 }
 
@@ -73,8 +73,9 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 				FPValue &theValue = theScript->getVarValue(i, 0);
 				ParamType2 theType = theValue.type;
 				if (theType == TYPE_INODE){
-					char* sourceName = theValue.n->GetName(); 
-					DebugPrint("%*sTarget: %s \n", indent, " ", theValue.n->GetName());
+					//char* sourceName = theValue.n->GetName(); 
+					MSTR sourceName = theValue.n->GetName();
+					DebugPrint(L"%*sTarget: %s \n", indent, " ", theValue.n->GetName());
 					int njkl = 0;
 				}
 			}
@@ -84,7 +85,7 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 		//FPInterfaceDesc* theDesc = theNewScriptControl->GetDescByID(IID_SCRIPT_CONTROL);
 		//Interface_ID testID = theDesc->GetID();
 
-		DebugPrint("%*sNode: %s ...is a scriptControl node\n", indent, " ", theNode->GetName());
+		DebugPrint(L"%*sNode: %s ...is a scriptControl node\n", indent, " ", theNode->GetName());
 		//MSTR theExpression = theScriptControl->GetExpression();
 		//MSTR theScriptDescription = theScriptControl->GetDescription();
 		MSTR theSourceVariableName = _M("source");
@@ -94,7 +95,8 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 		//Value* theSourceVariableIntegerIndex = Integer::heap_intern(theSourceVariableIndex);
 		Value* theSourceNodeVal = theScriptControl->GetVarValue(Integer::intern(theSourceVariableIndex+1), 0);
 		INode* thesourceNode = theSourceNodeVal->to_node();
-		char *theNodeName = thesourceNode->GetName();
+		//char *theNodeName = thesourceNode->GetName();
+		MSTR theNodeName = thesourceNode->GetName();
 		int ij = 0;
 	}
 
@@ -102,24 +104,24 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 
 	MSTR theControlClassName;
 	theControl->GetClassName(theControlClassName);
-	DebugPrint("%*sName of the control: %s ... ClassID: 0x%lX : 0x%lX\n", indent, " ", theControlClassName, theControlClassID.PartA(), theControlClassID.PartB());
+	DebugPrint(L"%*sName of the control: %s ... ClassID: 0x%lX : 0x%lX\n", indent, " ", theControlClassName, theControlClassID.PartA(), theControlClassID.PartB());
 	int numKeys = theControl->NumKeys();
-	DebugPrint("%*sNumber of animation keys: %i\n", indent, " ", numKeys);
+	DebugPrint(L"%*sNumber of animation keys: %i\n", indent, " ", numKeys);
 	Matrix3 theMatrix;
 	IXMLDOMElement* theTrackElement = NULL;
 
 	switch(theControlSuperID){
 	case PRS_CONTROL_CLASS_ID:
-		DebugPrint("%*sit's a PRS_CONTROL_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a PRS_CONTROL_CLASS_ID\n", indent, " ");
 		break;
 	case CTRL_MATRIX3_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_MATRIX3_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_MATRIX3_CLASS_ID\n", indent, " ");
 		theMatrix.IdentityMatrix();
 		theControl->GetValue(0, (void*)&theMatrix, FOREVER, CTRL_RELATIVE);
-		DebugPrint("%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-		DebugPrint("%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-		DebugPrint("%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-		DebugPrint("%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+		DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
+		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
+		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
+		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 		if (isLeaf != TRUE){
 			++indent;
@@ -145,7 +147,7 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 			--indent;
 		}
 		else {
-			DebugPrint("%*sIt hasn't a keyframe\n", indent, " ");
+			DebugPrint(L"%*sIt hasn't a keyframe\n", indent, " ");
 			++indent;
 			theTrackElement = insertMatrixTrackForAnimation(theAnimationElement);
 			processMatrixControl(theNode, theControl, expFile, theTrackElement);
@@ -154,34 +156,34 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 
 		break;
 	case CTRL_FLOAT_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_FLOAT_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_FLOAT_CLASS_ID\n", indent, " ");
 		break;
 	case CTRL_POINT3_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_POINT3_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_POINT3_CLASS_ID\n", indent, " ");
 		break;
 	case CTRL_POSITION_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_POSITION_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_POSITION_CLASS_ID\n", indent, " ");
 		++indent;
 		theTrackElement = insertPositionTrackForAnimation(theAnimationElement);
 		processXYZControl(theNode, theControl, expFile, theAnimationElement, theTrackElement);
 		--indent;
 		break;
 	case CTRL_ROTATION_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_ROTATION_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_ROTATION_CLASS_ID\n", indent, " ");
 		++indent;
 		theTrackElement = insertRotationTrackForAnimation(theAnimationElement);
 		processXYZControl(theNode, theControl, expFile, theAnimationElement, theTrackElement);
 		--indent;
 		break;
 	case CTRL_SCALE_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_SCALE_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_SCALE_CLASS_ID\n", indent, " ");
 		++indent;
 		theTrackElement = insertScaleTrackForAnimation(theAnimationElement);
 		processScaleControl(theNode, theControl, expFile, theTrackElement);
 		--indent;
 		break;
 	case CTRL_MORPH_CLASS_ID:
-		DebugPrint("%*sit's a CTRL_MORPH_CLASS_ID\n", indent, " ");
+		DebugPrint(L"%*sit's a CTRL_MORPH_CLASS_ID\n", indent, " ");
 		break;
 	default:
 		break;
@@ -197,10 +199,10 @@ int getControllersKeys(Control* theControl, keySet& theKeys){
 	if (theKeyControl != NULL){
 		int numKeys = theKeyControl->GetNumKeys();
 		if (numKeys == 0){
-			DebugPrint("%*sit hasn't any key\n", indent, " ");
+			DebugPrint(L"%*sit hasn't any key\n", indent, " ");
 		}
 		else {
-			DebugPrint("%*sit has %i keys\n", indent, " ", numKeys);
+			DebugPrint(L"%*sit has %i keys\n", indent, " ", numKeys);
 		}
 		for (int i = 0; i < numKeys; i++){
 			IKey* aKey = NULL;
@@ -219,21 +221,21 @@ int getControllersKeys(Control* theControl, keySet& theKeys){
 				if (theControlClassID == Class_ID(HYBRIDINTERP_FLOAT_CLASS_ID, 0)){
 					//aKey = new IBezFloatKey();
 					++indent;
-					DebugPrint("%*sThe key in time[%i]: %f\n", indent, " ", aKey->time, ((IBezFloatKey*)aKey)->val);
+					DebugPrint(L"%*sThe key in time[%i]: %f\n", indent, " ", aKey->time, ((IBezFloatKey*)aKey)->val);
 					--indent;
 				}
 				delete aKey;
 			}
 		}
 	} else {
-		DebugPrint("%*sit hasn't a IKeyControl interface\n", indent, " ");
+		DebugPrint(L"%*sit hasn't a IKeyControl interface\n", indent, " ");
 	}
 
 	if (theControl->IsLeaf() == FALSE){
-		DebugPrint("%*sit has subcontrollers\n", indent, " ");
+		DebugPrint(L"%*sit has subcontrollers\n", indent, " ");
 
 	} else {
-		DebugPrint("%*sit has NO subcontrollers at all\n", indent, " ");
+		DebugPrint(L"%*sit has NO subcontrollers at all\n", indent, " ");
 	}
 	return numKeysInserted;
 }
@@ -245,21 +247,21 @@ void processXYZControl(INode* theNode, Control* theControl, FILE* expFile, IXMLD
 	if ((theEulerControl != NULL) || (theControl->ClassID() == POSITION_XYZ_CLASSID)){
 		Control* theXControl = theControl->GetXController();
 		if (theXControl != NULL){
-			DebugPrint("%*s	theXControl\n", indent, " ");
+			DebugPrint(L"%*s	theXControl\n", indent, " ");
 			visitController(theNode, theXControl, expFile, theAnimationElement);
 			getControllersKeys(theXControl, theKeys);
 		}
 
 		Control* theYControl = theControl->GetYController();
 		if (theYControl != NULL){
-			DebugPrint("%*s	theYControl\n", indent, " ");
+			DebugPrint(L"%*s	theYControl\n", indent, " ");
 			visitController(theNode, theYControl, expFile, theAnimationElement);
 			getControllersKeys(theYControl, theKeys);
 		}
 
 		Control* theZControl = theControl->GetZController();
 		if (theZControl != NULL){
-			DebugPrint("%*s	theZControl\n", indent, " ");
+			DebugPrint(L"%*s	theZControl\n", indent, " ");
 			visitController(theNode, theZControl, expFile, theAnimationElement);
 			getControllersKeys(theZControl, theKeys);
 		}
@@ -300,37 +302,38 @@ void extractControlDataFromKeys(INode* theNode, keySet& theKeys, Control* theCon
 		Matrix3 localMatrix;
 		Point3 theEulerAngle;
 		int theOrder = -1;
-		char* theOrderString = NULL;
+		//char* theOrderString = NULL;
+		_TCHAR* theOrderString = NULL;
 		ScaleValue theScale;
 
 		switch (theControl->SuperClassID()){
 		case CTRL_POSITION_CLASS_ID:
 			getPositionFromControllerByTime(theControl, theTime, thePoint);
-			DebugPrint("%*s		Time: %i, Point: (%f, %f, %f)\n", indent, " ", theTime, thePoint.x, thePoint.y, thePoint.z);
+			DebugPrint(L"%*s		Time: %i, Point: (%f, %f, %f)\n", indent, " ", theTime, thePoint.x, thePoint.y, thePoint.z);
 			insertPositionKeyForTrack(theTrackElement, theTime, thePoint.x, thePoint.y, thePoint.z);
 			break;
 		case CTRL_ROTATION_CLASS_ID:
 			//getQuaternionFromControllerByTime(theControl, theTime, theQuat); 
 			getEulerAnglesFromControllerByTime(theControl, theTime, theEulerAngle, theOrder);
-			theOrderString = new char[5];
+			theOrderString = new _TCHAR[5];
 			eulerOrderString(&theOrderString, theOrder);
 			insertRotationEulerKeyForTrack(theTrackElement, theTime, theOrderString, theEulerAngle.x, theEulerAngle.y, theEulerAngle.z);
-			DebugPrint("%*s		Time: %i, Order: %s, Euler Angle: (%f, %f, %f)\n", indent, " ", theTime, theOrderString, theEulerAngle.x, theEulerAngle.y, theEulerAngle.z);
-			//DebugPrint("%*s		Time: %i, Quat: [%f], (%f, %f, %f)\n", indent, " ", theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
+			DebugPrint(L"%*s		Time: %i, Order: %s, Euler Angle: (%f, %f, %f)\n", indent, " ", theTime, theOrderString, theEulerAngle.x, theEulerAngle.y, theEulerAngle.z);
+			//DebugPrint(L"%*s		Time: %i, Quat: [%f], (%f, %f, %f)\n", indent, " ", theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
 			//insertRotationQuatKeyForTrack(theTrackElement, theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
 			delete theOrderString;
 			break;
 		case CTRL_SCALE_CLASS_ID:
 			getScaleFromControllerByTime(theControl, theTime, theScale);
-			DebugPrint("%*s		Time: %i, Scale: (%f, %f, %f), Axis: [%f], (%f, %f, %f)\n", indent, " ", theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
+			DebugPrint(L"%*s		Time: %i, Scale: (%f, %f, %f), Axis: [%f], (%f, %f, %f)\n", indent, " ", theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
 			insertScaleKeyForTrack(theTrackElement, theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
 			break;
 		case CTRL_MATRIX3_CLASS_ID:
 			getMatrixFromControllerByTime(theNode, theControl, theTime, theMatrix, localMatrix);
-			DebugPrint("%*s		Time: %i, row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-			DebugPrint("%*s		          row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-			DebugPrint("%*s		          row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-			DebugPrint("%*s		          row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+			DebugPrint(L"%*s		Time: %i, row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
+			DebugPrint(L"%*s		          row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
+			DebugPrint(L"%*s		          row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
+			DebugPrint(L"%*s		          row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 			insertMatrixKeyForTrack(theTrackElement, theTime,	theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z,
 																theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z,
@@ -367,23 +370,23 @@ bool getEulerAnglesFromControllerByTime(Control* theControl, TimeValue t, Point3
 
 		Control* theXControl = theControl->GetXController();
 		if (theXControl != NULL){
-			//DebugPrint("%*s	theXControl\n", indent, " ");
+			//DebugPrint(L"%*s	theXControl\n", indent, " ");
 			theXControl->GetValue(t, (void*)&(theAngle.x), FOREVER);
 		}
 
 		Control* theYControl = theControl->GetYController();
 		if (theYControl != NULL){
-			//DebugPrint("%*s	theXControl\n", indent, " ");
+			//DebugPrint(L"%*s	theXControl\n", indent, " ");
 			theYControl->GetValue(t, (void*)&(theAngle.y), FOREVER);
 		}
 
 		Control* theZControl = theControl->GetZController();
 		if (theZControl != NULL){
-			//DebugPrint("%*s	theXControl\n", indent, " ");
+			//DebugPrint(L"%*s	theXControl\n", indent, " ");
 			theZControl->GetValue(t, (void*)&(theAngle.z), FOREVER);
 		}
 		
-		DebugPrint("%*s	the Euler angle: (%f, %f, %f)\n", indent, " ", theAngle.x, theAngle.y, theAngle.z );
+		DebugPrint(L"%*s	the Euler angle: (%f, %f, %f)\n", indent, " ", theAngle.x, theAngle.y, theAngle.z );
 
 		itReturnedAAngle = true;
 	}
@@ -423,38 +426,38 @@ bool getMatrixFromControllerByTime(INode* theNode, Control* theControl, TimeValu
 	return itReturnedAMatrix;
 }
 
-void eulerOrderString(char** theOrderString, int theOrder){
+void eulerOrderString(_TCHAR** theOrderString, int theOrder){
 	if (theOrderString != NULL){
 		switch (theOrder){
 		case EULERTYPE_XYZ:
-			strcpy(*theOrderString, "XYZ");
+			_tcscpy(*theOrderString, TEXT("XYZ"));
 			break;
 		case EULERTYPE_XZY:
-			strcpy(*theOrderString, "XZY");
+			_tcscpy(*theOrderString, TEXT("XZY"));
 			break;
 		case EULERTYPE_YZX:
-			strcpy(*theOrderString, "YZX");
+			_tcscpy(*theOrderString, TEXT("YZX"));
 			break;
 		case EULERTYPE_YXZ:
-			strcpy(*theOrderString, "YXZ");
+			_tcscpy(*theOrderString, TEXT("YXZ"));
 			break;
 		case EULERTYPE_ZXY:
-			strcpy(*theOrderString, "ZXY");
+			_tcscpy(*theOrderString, TEXT("ZXY"));
 			break;
 		case EULERTYPE_ZYX:
-			strcpy(*theOrderString, "ZYX");
+			_tcscpy(*theOrderString, TEXT("ZYX"));
 			break;
 		case EULERTYPE_XYX:
-			strcpy(*theOrderString, "XYX");
+			_tcscpy(*theOrderString, TEXT("XYX"));
 			break;
 		case EULERTYPE_YZY:
-			strcpy(*theOrderString, "YZY");
+			_tcscpy(*theOrderString, TEXT("YZY"));
 			break;
 		case EULERTYPE_ZXZ:
-			strcpy(*theOrderString, "ZXZ");
+			_tcscpy(*theOrderString, TEXT("ZXZ"));
 			break;
 		case EULERTYPE_RF:
-			strcpy(*theOrderString, "RF");
+			_tcscpy(*theOrderString, TEXT("RF"));
 			break;
 		}
 	}
@@ -465,7 +468,7 @@ void processBipedControl(Control* theControl, INode* theNode, IBipMaster12* theB
 	for (int currentKey = 0; currentKey < theControl->NumKeys(); currentKey++){
 		theKeys.insert(theControl->GetKeyTime(currentKey));
 	}
-	DebugPrint("%*snum of biped keys: [%i]\n", indent, " ", theKeys.size());
+	DebugPrint(L"%*snum of biped keys: [%i]\n", indent, " ", theKeys.size());
 	//insertNumKeysAttrForTrack(theTrackElement, theKeys.size());
 	//extractControlDataFromKeys(theKeys, theControl, theTrackElement);
 	++indent;
@@ -476,15 +479,15 @@ void processBipedControl(Control* theControl, INode* theNode, IBipMaster12* theB
 		ScaleValue theScale;
 
 		thePoint = theBipMaster->GetBipedPos(theTime, theNode);
-		DebugPrint("%*s		Time: %i, Point: (%f, %f, %f)\n", indent, " ", theTime, thePoint.x, thePoint.y, thePoint.z);
+		DebugPrint(L"%*s		Time: %i, Point: (%f, %f, %f)\n", indent, " ", theTime, thePoint.x, thePoint.y, thePoint.z);
 		//insertPositionKeyForTrack(theTrackElement, theTime, thePoint.x, thePoint.y, thePoint.z);
 
 		theQuat = theBipMaster->GetBipedRot(theTime, theNode);
-		DebugPrint("%*s		Time: %i, Quat: [%f], (%f, %f, %f)\n", indent, " ", theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
+		DebugPrint(L"%*s		Time: %i, Quat: [%f], (%f, %f, %f)\n", indent, " ", theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
 		//insertRotationQuatKeyForTrack(theTrackElement, theTime, theQuat.w, theQuat.x, theQuat.y, theQuat.z);
 		
 		theScale = theBipMaster->GetBipedScale(theTime, theNode);
-		DebugPrint("%*s		Time: %i, Scale: (%f, %f, %f), Axis: [%f], (%f, %f, %f)\n", indent, " ", theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
+		DebugPrint(L"%*s		Time: %i, Scale: (%f, %f, %f), Axis: [%f], (%f, %f, %f)\n", indent, " ", theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
 		//insertScaleKeyForTrack(theTrackElement, theTime, theScale.s.x, theScale.s.y, theScale.s.z, theScale.q.w, theScale.q.x, theScale.q.y, theScale.q.z);
 			
 	}

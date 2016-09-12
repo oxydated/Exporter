@@ -12,7 +12,7 @@ oxyExpDesc::oxyExpDesc( HINSTANCE hInst ){ hModule = hInst;}
 int oxyExpDesc::IsPublic() { return TRUE; }
 
 void* oxyExpDesc::Create( BOOL loading ){
-	DebugPrint("Creating the exporter plugin\n");
+	DebugPrint(L"Creating the exporter plugin\n");
 	return new oxyExp( hModule );
 }
 

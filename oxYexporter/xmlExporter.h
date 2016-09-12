@@ -82,6 +82,6 @@ IXMLDOMElement* getTransformationsElement();
 //	</transformations>
 
 //</document>
-void closeFile(const char *name);
+void closeFile(const _TCHAR *name);
 
 #endif

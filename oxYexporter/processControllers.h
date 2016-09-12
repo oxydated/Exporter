@@ -48,6 +48,6 @@ bool getScaleFromControllerByTime(Control* theControl, TimeValue t, ScaleValue& 
 
 bool getMatrixFromControllerByTime(INode* theNode, Control* theControl, TimeValue t, Matrix3& theMatrix, Matrix3& localMatrix);
 
-void eulerOrderString(char** theOrderString, int theOrder);
+void eulerOrderString(_TCHAR** theOrderString, int theOrder);
 
 #endif

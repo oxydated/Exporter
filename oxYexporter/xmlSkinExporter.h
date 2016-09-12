@@ -8,7 +8,7 @@ IXMLDOMElement* insertSkinByID(int ID, TCHAR* skinNodeName, int meshID, int numB
 
 IXMLDOMElement* insertObjectTMforSkin(IXMLDOMElement* skinNode, Matrix3 theObjectTM);
 
-IXMLDOMElement* insertBoneForSkin(IXMLDOMElement* skinNode, TCHAR* boneName, int boneIndex);
+IXMLDOMElement* insertBoneForSkin(IXMLDOMElement* skinNode, _TCHAR* boneName, int boneIndex);
 
 IXMLDOMElement* insertObjectTMforBone(IXMLDOMElement* boneNode, Matrix3 theBoneTM);
 

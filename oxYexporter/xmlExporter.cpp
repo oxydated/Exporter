@@ -119,7 +119,7 @@ IXMLDOMElement* getTransformationsElement(){
 	return retTransformations;
 };
 
-IXMLDOMElement* insertNode( IXMLDOMElement* parent, TCHAR* nodeName, int nodeObject ){
+IXMLDOMElement* insertNode( IXMLDOMElement* parent, _TCHAR* nodeName, int nodeObject ){
 	IXMLDOMElement* retElement = NULL;
 	HRESULT hr = S_OK;
 	hr = theDocument->createElement(SysAllocString(L"node"), &retElement);
@@ -129,7 +129,7 @@ IXMLDOMElement* insertNode( IXMLDOMElement* parent, TCHAR* nodeName, int nodeObj
 	return retElement;
 }
 
-void closeFile(const char *name){
+void closeFile(const _TCHAR *name){
 	if( theDocument != NULL ){
 		IXMLDOMDocument3* xslDoc = NULL;
 		IXMLDOMDocument3* outDoc = NULL;
@@ -138,7 +138,7 @@ void closeFile(const char *name){
 		xslDoc->put_validateOnParse(VARIANT_FALSE);
 		xslDoc->put_resolveExternals(VARIANT_FALSE);
 		xslDoc->put_preserveWhiteSpace(VARIANT_FALSE);
-		LPTSTR theStyle = new TCHAR[800];
+		LPTSTR theStyle = new _TCHAR[800];
 		LoadString( getThisDLLModule(), IDS_STYLE_INDENT, theStyle, 800);
 		BSTR theInputStyle = _bstr_t(theStyle);
 

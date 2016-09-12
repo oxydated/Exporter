@@ -24,10 +24,10 @@ void visitNodes(INode* rootNode, TimeValue t, FILE* expFile){
 	while(!theStack.empty()){
 		nodePair thePair = theStack.top();
 		INode* topNode = thePair.second;
-		IXMLDOMElement* newParent = insertNode(thePair.first, topNode->GetName(), nodeObjectID);
+		IXMLDOMElement* newParent = insertNode(thePair.first, (_TCHAR*)topNode->GetName(), nodeObjectID);
 		theStack.pop();
 
-		DebugPrint("Name of the topNode: %s\n",  topNode->GetName());
+		DebugPrint(L"Name of the topNode: %s\n",  topNode->GetName());
 
 		bool boneTest = false, skinTest = false, derivedTest = false;
 		if (!topNode->IsRootNode()){
@@ -43,7 +43,7 @@ void visitNodes(INode* rootNode, TimeValue t, FILE* expFile){
 				IDerivedObject* theDerivedObj = (IDerivedObject*)theTopNodeObject;
 
 				if (isThereASkinModifier(theDerivedObj)){
-					extractSkinDataFromObj(theDerivedObj, topNode, topNode->GetName(), expFile);
+					extractSkinDataFromObj(theDerivedObj, topNode, (_TCHAR*)topNode->GetName(), expFile);
 				}
 			}
 			bool toSee = boneTest;
