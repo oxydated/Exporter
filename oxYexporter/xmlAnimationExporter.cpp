@@ -203,3 +203,36 @@ IXMLDOMElement* insertMatrixKeyForTrack(IXMLDOMElement* theMatrixTrackElement, i
 
 	return theMatrixKeyElement;
 }
+
+IXMLDOMElement * insertBaseSpinningBoneForAnimation(IXMLDOMElement * theAnimationElement, _TCHAR * source, float l0c0, float l0c1, float l0c2, float l1c0, float l1c1, float l1c2, float l2c0, float l2c1, float l2c2, float l3c0, float l3c1, float l3c2)
+{
+	IXMLDOMDocument3* theDocument = NULL;
+	HRESULT hr = S_OK;
+
+	theDocument = getTheDocument();
+
+	IXMLDOMElement* theBaseSpinningBoneElement = NULL;
+	hr = theDocument->createElement(L"baseSpinningBone", &theBaseSpinningBoneElement);
+
+	hr = theAnimationElement->appendChild(theBaseSpinningBoneElement, NULL);
+
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"source"), _variant_t(source));
+
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l0c0"), _variant_t(l0c0));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l0c1"), _variant_t(l0c1));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l0c2"), _variant_t(l0c2));
+
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l1c0"), _variant_t(l1c0));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l1c1"), _variant_t(l1c1));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l1c2"), _variant_t(l1c2));
+
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l2c0"), _variant_t(l2c0));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l2c1"), _variant_t(l2c1));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l2c2"), _variant_t(l2c2));
+
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l3c0"), _variant_t(l3c0));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l3c1"), _variant_t(l3c1));
+	hr = theBaseSpinningBoneElement->setAttribute(SysAllocString(L"l3c2"), _variant_t(l3c2));
+
+	return theBaseSpinningBoneElement;
+}

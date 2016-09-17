@@ -100,8 +100,7 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 		}
 
 		if(theControlClassID == PRS_SCRIPT_CONTROL_CLASS_ID){
-			processScriptControl(theControl, theAnimationElement);
-			/*IScriptCtrl* theScriptControl = NULL;
+			IScriptCtrl* theScriptControl = NULL;
 			theScriptControl = (IScriptCtrl*)theControl->GetInterface(IID_SCRIPT_CONTROL);
 			if (theScriptControl != NULL) {
 				IBaseScriptControl8* theScript = (IBaseScriptControl8*)theControl;
@@ -145,7 +144,7 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 				INode* thesourceNode = theSourceNodeVal->to_node();
 				MSTR theNodeName = thesourceNode->GetName();
 				int ij = 0;
-			}*/
+			}
 		}
 		else {
 
@@ -522,16 +521,14 @@ void processBaseSpinningBoneControl(Control* theControl, IXMLDOMElement * theAni
 
 	int varCount = theScript->getVarCount();
 	MSTR sourceVarName = _M("source");
-	MSTR sourceName;
 	MSTR localTransformVarName = _M("local_transform_for_newBone_On_Creation");
-	Matrix3 localTransform;
 	for (int i = 0; i < varCount; i++) {
 		MSTR &varName = theScript->getVarName(i);
 		if (varName == sourceVarName) {
 			FPValue &theValue = theScript->getVarValue(i, 0);
 			ParamType2 theType = theValue.type;
 			if (theType == TYPE_INODE) {
-				sourceName = theValue.n->GetName();
+				MSTR sourceName = theValue.n->GetName();
 				DebugPrint(L"%*sTarget: %s \n", indent, " ", theValue.n->GetName());
 				int njkl = 0;
 			}
@@ -540,18 +537,14 @@ void processBaseSpinningBoneControl(Control* theControl, IXMLDOMElement * theAni
 			FPValue &theValue = theScript->getVarValue(i, 0);
 			ParamType2 theType = theValue.type;
 			if (theType == TYPE_MATRIX3_BV) {
-				localTransform = *(theValue.m);
-				DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", localTransform.GetRow(0).x, localTransform.GetRow(0).y, localTransform.GetRow(0).z);
-				DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", localTransform.GetRow(1).x, localTransform.GetRow(1).y, localTransform.GetRow(1).z);
-				DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", localTransform.GetRow(2).x, localTransform.GetRow(2).y, localTransform.GetRow(2).z);
-				DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", localTransform.GetRow(3).x, localTransform.GetRow(3).y, localTransform.GetRow(3).z);
+				Matrix3* localTransform = theValue.m;
+				DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", localTransform->GetRow(0).x, localTransform->GetRow(0).y, localTransform->GetRow(0).z);
+				DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", localTransform->GetRow(1).x, localTransform->GetRow(1).y, localTransform->GetRow(1).z);
+				DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", localTransform->GetRow(2).x, localTransform->GetRow(2).y, localTransform->GetRow(2).z);
+				DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", localTransform->GetRow(3).x, localTransform->GetRow(3).y, localTransform->GetRow(3).z);
 				int njkl = 0;
 			}
 		}
 		int zerro = 0;
 	}
-	insertBaseSpinningBoneForAnimation( theAnimationElement, (_TCHAR*)sourceName.ToBSTR(),	localTransform.GetRow(0).x, localTransform.GetRow(0).y, localTransform.GetRow(0).z,
-																							localTransform.GetRow(1).x, localTransform.GetRow(1).y, localTransform.GetRow(1).z,
-																							localTransform.GetRow(2).x, localTransform.GetRow(2).y, localTransform.GetRow(2).z,
-																							localTransform.GetRow(3).x, localTransform.GetRow(3).y, localTransform.GetRow(3).z);
 }

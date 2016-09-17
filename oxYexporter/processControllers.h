@@ -32,6 +32,10 @@ void processMatrixControl(INode* theNode, Control* theControl, FILE* expFile, IX
 
 void processBipedControl(Control* theControl, INode* theNode, IBipMaster12* theBipMaster, FILE* expFile, IXMLDOMElement* theTrackElement);
 
+void processScriptControl(Control* theControl, IXMLDOMElement* theAnimationElement);
+
+void processBaseSpinningBoneControl(Control* theControl, IXMLDOMElement* theAnimationElement);
+
 //void processRotationControl(Control* theControl, FILE* expFile);
 
 //void processPositionControl(Control* theControl, FILE* expFile);

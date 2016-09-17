@@ -20,7 +20,7 @@ IXMLDOMElement* getRootElement();
 IXMLDOMElement* getSceneElement();
 
 //		<node nodeName="str" nodeMatrix="int"	nodeObject="int">
-IXMLDOMElement* insertNode( IXMLDOMElement* parent, TCHAR* nodeName, int nodeObject );
+IXMLDOMElement* insertNode( IXMLDOMElement* parent, _TCHAR* nodeName, int nodeObject );
 //			<node	...
 
 //		</node>

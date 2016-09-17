@@ -58,6 +58,12 @@ IXMLDOMElement* insertMatrixKeyForTrack(IXMLDOMElement* theMatrixTrackElement, i
 
 //		< / matrixTrack>
 //	< / keyFrames>
+
+
+//	<baseSpinningBone source = "source" l0c0="1.0" l0c1="1.0" l0c2="1.0" l1c0="1.0" l1c1="1.0" l1c2="1.0" l2c0="1.0" l2c1="1.0" l2c2="1.0" l3c0="1.0" l3c1="1.0" l3c2="1.0" / >
+
+IXMLDOMElement* insertBaseSpinningBoneForAnimation(IXMLDOMElement* theAnimationElement, _TCHAR* source, float l0c0, float l0c1, float l0c2, float l1c0, float l1c1, float l1c2, float l2c0, float l2c1, float l2c2, float l3c0, float l3c1, float l3c2);
+
 //< / animaton>
 
 #endif
