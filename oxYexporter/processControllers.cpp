@@ -290,6 +290,65 @@ void processScaleControl(INode* theNode, Control* theControl, FILE* expFile, IXM
 
 void processMatrixControl(INode* theNode, Control* theControl, FILE* expFile, IXMLDOMElement* theTrackElement){
 	keySet theKeys;
+
+	BOOL isLeaf = theControl->IsLeaf();
+	if (isLeaf != TRUE) {
+		++indent;
+		Control* thePosControl = theControl->GetPositionController();
+		if (thePosControl != NULL) {
+			if (thePosControl->ClassID() == POSITION_XYZ_CLASSID) {
+
+				Control* theXControl = thePosControl->GetXController();
+				if (theXControl != NULL) {
+					DebugPrint(L"%*s	theXControl\n", indent, " ");
+					getControllersKeys(theXControl, theKeys);
+				}
+
+				Control* theYControl = thePosControl->GetYController();
+				if (theYControl != NULL) {
+					DebugPrint(L"%*s	theYControl\n", indent, " ");
+					getControllersKeys(theYControl, theKeys);
+				}
+
+				Control* theZControl = thePosControl->GetZController();
+				if (theZControl != NULL) {
+					DebugPrint(L"%*s	theZControl\n", indent, " ");
+					getControllersKeys(theZControl, theKeys);
+				}
+			}
+		}
+
+		Control* theRotControl = theControl->GetRotationController();
+		if (theRotControl != NULL) {
+			if ((IEulerControl*)theRotControl->GetInterface(I_EULERCTRL) != NULL) {
+
+				Control* theXControl = theRotControl->GetXController();
+				if (theXControl != NULL) {
+					DebugPrint(L"%*s	theXControl\n", indent, " ");
+					getControllersKeys(theXControl, theKeys);
+				}
+
+				Control* theYControl = theRotControl->GetYController();
+				if (theYControl != NULL) {
+					DebugPrint(L"%*s	theYControl\n", indent, " ");
+					getControllersKeys(theYControl, theKeys);
+				}
+
+				Control* theZControl = theRotControl->GetZController();
+				if (theZControl != NULL) {
+					DebugPrint(L"%*s	theZControl\n", indent, " ");
+					getControllersKeys(theZControl, theKeys);
+				}
+			}
+		}
+
+		Control* theScaleControl = theControl->GetScaleController();
+		if (theScaleControl != NULL) {
+			getControllersKeys(theScaleControl, theKeys);
+		}
+		--indent;
+	}
+
 	if (theControl->NumKeys() != NOT_KEYFRAMEABLE)
 	{
 		for (int currentKey = 0; currentKey < theControl->NumKeys(); currentKey++){
@@ -430,7 +489,16 @@ bool getMatrixFromControllerByTime(INode* theNode, Control* theControl, TimeValu
 
 		Matrix3 parentMat = theNode->GetParentTM(t);
 		theControl->GetValue(t, (void*)&theMatrix, FOREVER, CTRL_RELATIVE);
-		localMatrix = theMatrix * Inverse(parentMat);
+
+		IBipMaster12* theBipMaster = NULL;
+
+		theBipMaster = (IBipMaster12*)theControl->GetInterface(IBipMaster12::I_BIPMASTER12);
+		if (theBipMaster != NULL) {	
+			localMatrix = theMatrix * Inverse(parentMat);  
+		}
+		else {
+			localMatrix = theMatrix;
+		}
 		itReturnedAMatrix = true;
 	}
 	return itReturnedAMatrix;
