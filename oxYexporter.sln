@@ -1,7 +1,15 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "oxYexporter", "oxYexporter\oxYexporter.vcxproj", "{D1F3200F-222F-4903-8431-ACE98901A093}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MathUtility", "MathUtility\MathUtility.vcxproj", "{063E7C53-6081-4F8F-B48F-C170E400A32E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libraryTest", "libraryTest\libraryTest.vcxproj", "{C7107D90-DF61-4565-9AD2-33E766898112}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dualQuatLib", "..\dualQuatLib\dualQuatLib.vcxproj", "{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +33,43 @@ Global
 		{D1F3200F-222F-4903-8431-ACE98901A093}.Release|Win32.Build.0 = Release|Win32
 		{D1F3200F-222F-4903-8431-ACE98901A093}.Release|x64.ActiveCfg = Release|x64
 		{D1F3200F-222F-4903-8431-ACE98901A093}.Release|x64.Build.0 = Release|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Debug|Win32.Build.0 = Debug|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Debug|x64.ActiveCfg = Debug|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Debug|x64.Build.0 = Debug|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Hybrid|Win32.ActiveCfg = Release|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Hybrid|Win32.Build.0 = Release|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Hybrid|x64.ActiveCfg = Debug|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Hybrid|x64.Build.0 = Debug|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Hybrid|x64.Deploy.0 = Debug|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Release|Win32.ActiveCfg = Release|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Release|Win32.Build.0 = Release|Win32
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Release|x64.ActiveCfg = Release|x64
+		{063E7C53-6081-4F8F-B48F-C170E400A32E}.Release|x64.Build.0 = Release|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Debug|Win32.Build.0 = Debug|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Debug|x64.ActiveCfg = Debug|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Debug|x64.Build.0 = Debug|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Hybrid|Win32.ActiveCfg = Release|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Hybrid|Win32.Build.0 = Release|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Hybrid|x64.ActiveCfg = Release|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Hybrid|x64.Build.0 = Release|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Release|Win32.ActiveCfg = Release|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Release|Win32.Build.0 = Release|Win32
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Release|x64.ActiveCfg = Release|x64
+		{C7107D90-DF61-4565-9AD2-33E766898112}.Release|x64.Build.0 = Release|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Debug|Win32.Build.0 = Debug|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Debug|x64.ActiveCfg = Debug|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Debug|x64.Build.0 = Debug|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Hybrid|Win32.ActiveCfg = Release|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Hybrid|Win32.Build.0 = Release|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Hybrid|x64.ActiveCfg = Release|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Hybrid|x64.Build.0 = Release|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Release|Win32.ActiveCfg = Release|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Release|Win32.Build.0 = Release|Win32
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Release|x64.ActiveCfg = Release|x64
+		{E1D6D991-7E19-49D1-8207-8ABB6EA755DC}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

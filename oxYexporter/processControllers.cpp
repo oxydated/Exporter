@@ -1,6 +1,7 @@
 #include "processControllers.h"
 #include "printUtilities.h"
 #include "ikctrl.h"
+#include "controllerDataExtractor.h"
 #include <maxscript/foundation/numbers.h>
 
 static _TCHAR theString[100] = TEXT("");
@@ -40,6 +41,10 @@ void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* the
 		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
 		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
 		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+
+		/// Controller Extractor Test
+		auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(theTMControl, theNode);
+		theControllerExtractor->exportController();
 
 	} else {
 		DebugPrint(L"%*sNo Control for node %s\n", indent, " ", theNode->GetName());
@@ -86,14 +91,17 @@ void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOM
 			++indent;
 			Control* thePosControl = theControl->GetPositionController();
 			if (thePosControl != NULL){
+				DebugPrint(L"Path #1 - thePosControl\n");
 				visitController(theNode, thePosControl, expFile, theAnimationElement);
 			}
 			Control* theRotControl = theControl->GetRotationController();
 			if (theRotControl != NULL){
+				DebugPrint(L"Path #2 - theRotControl\n");
 				visitController(theNode, theRotControl, expFile, theAnimationElement);
 			}
 			Control* theScaleControl = theControl->GetScaleController();
 			if (theScaleControl != NULL){
+				DebugPrint(L"Path #3 - theScaleControl\n");
 				visitController(theNode, theScaleControl, expFile, theAnimationElement);
 			}
 			--indent;

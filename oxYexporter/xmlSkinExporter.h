@@ -12,6 +12,8 @@ IXMLDOMElement* insertBoneForSkin(IXMLDOMElement* skinNode, _TCHAR* boneName, in
 
 IXMLDOMElement* insertObjectTMforBone(IXMLDOMElement* boneNode, Matrix3 theBoneTM);
 
+IXMLDOMElement* insertDualQuatForBone(IXMLDOMElement* boneNode, float qs, float qx, float qy, float qz, float dqs, float dqx, float dqy, float dqz);
+
 IXMLDOMElement* insertVertexForSkin(IXMLDOMElement* skinNode, int vertexIndex, int numBonesForVertex);
 
 IXMLDOMElement* insertBoneEntryForVertex(IXMLDOMElement* vertexNode, int boneIndexForVertex, int boneIndexForSkin, float weight);

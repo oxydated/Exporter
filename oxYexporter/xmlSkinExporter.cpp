@@ -112,6 +112,31 @@ IXMLDOMElement* insertObjectTMforBone(IXMLDOMElement* boneNode, Matrix3 theBoneT
 	return theObjectTMElement;
 }
 
+IXMLDOMElement* insertDualQuatForBone(IXMLDOMElement* boneNode, float qs, float qx, float qy, float qz, float dqs, float dqx, float dqy, float dqz) {
+	/*
+	<boneDualQuat dqs="19.3022807402" dqx="-6.20234476474" dqy="-1.50649298003" dqz="-23.4315604127" qs="0.769934619861" qx="0.054620723471" qy="-0.107169469365" qz="0.626683303226" />
+	*/
+	IXMLDOMDocument3* theDocument = NULL;
+	HRESULT hr = S_OK;
+
+	theDocument = getTheDocument();
+	IXMLDOMElement* theDualQuatElement = NULL;
+
+	hr = theDocument->createElement(L"boneDualQuat", &theDualQuatElement);
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"qs"), _variant_t(qs));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"qx"), _variant_t(qx));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"qy"), _variant_t(qy));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"qz"), _variant_t(qz));
+
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqs"), _variant_t(dqs));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqx"), _variant_t(dqx));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqy"), _variant_t(dqy));
+	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqz"), _variant_t(dqz));
+
+	hr = boneNode->appendChild(theDualQuatElement, NULL);
+	return theDualQuatElement;
+}
+
 IXMLDOMElement* insertVertexForSkin(IXMLDOMElement* skinNode, int vertexIndex, int numBonesForVertex){
 	IXMLDOMDocument3* theDocument = NULL;
 	IXMLDOMNode* theVerticesNode = NULL;
