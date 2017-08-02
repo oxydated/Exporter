@@ -2,6 +2,8 @@
 #include "processGeometry.h"
 #include "xmlSkinExporter.h"
 #include "matrixUtility.h"
+#include "debugLog.h"
+#include "dualQuaternionMath.h"
 
 bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	bool thereIsASkinModifier = false;
@@ -87,30 +89,61 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 			m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
 			float qs, qx, qy, qz, dqs, dqx, dqy, dqz;
 			oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+
+			float qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz;
+
+			oxyde::log::printLine();
+			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUACOMP(q));
+			
+			oxyde::DQ::dual_quaternion_complement(DUALQUACOMP(q), DUALQUACOMP(qC));
+
+			oxyde::log::printDualQuat(L"DualQuatforBoneqC", DUALQUACOMP(qC));
+
+			//insertDualQuatForBone(theNewBoneElement, qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz);
 			insertDualQuatForBone(theNewBoneElement, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
 
-			std::wstring outStr;
-			std::wostringstream outStream(outStr);
-			outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
+			//float mf[16];
+			//for (int i = 0; i < 16; i++)mf[i] = m[i];
 
-			outStream << "ObjectTMforBone = Transpose[{";
-			outStream << "{" << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << "}" << ",";
-			outStream << "{" << m[4] << ", " << m[5] << ", " << m[6] << ", " << m[7] << "}" << ",";
-			outStream << "{" << m[8] << ", " << m[9] << ", " << m[10] << ", " << m[11] << "}" << ",";
-			outStream << "{" << m[12] << ", " << m[13] << ", " << m[14] << ", " << m[15] << "}" << "}]";
-			outStream << std::endl << std::endl;
+			//oxyde::log::printLine();
+			//oxyde::log::printMatrix(L"ObjectTMforBone", mf);
+			//oxyde::log::printDualQuat(L"DualQuatforBone",DUALQUACOMP(q));
+			//oxyde::log::printText(L"\nWith modified matrix\n" );
 
-			outStream << "DualQuatForBone = {";
-			outStream << qs << "," << qx << "," << qy << "," << qz << ",";
-			outStream << dqs << "," << dqx << "," << dqy << "," << dqz;
-			outStream << "}.dualQuatUnit";
-			outStream << std::endl;
-			outStream << "rotationMatrixFromDualQuat[dualQuatUnit]" << std::endl;
+			//m[0] = theMatrix.GetRow(0).x;		m[4] = theMatrix.GetRow(0).y;		m[8] = theMatrix.GetRow(0).z;		m[3] = 0.;
+			//m[1] = theMatrix.GetRow(1).x;		m[5] = theMatrix.GetRow(1).y;		m[9] = theMatrix.GetRow(1).z;		m[7] = 0.;
+			//m[2] = theMatrix.GetRow(2).x;		m[6] = theMatrix.GetRow(2).y;		m[10] = theMatrix.GetRow(2).z;		m[11] = 0.;
+			//m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
+			//for (int i = 0; i < 16; i++)mf[i] = m[i];
 
-			outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
+			//oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+			//oxyde::log::printMatrix(L"ModifiedTMforBone", mf);
+			//oxyde::log::printDualQuat(L"ModifiedDualQuatforBone", DUALQUACOMP(q));
 
-			std::wstring resultString(outStream.str());
-			DebugOutputString(resultString.c_str());
+
+
+			//std::wstring outStr;
+			//std::wostringstream outStream(outStr);
+			//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
+
+			//outStream << "ObjectTMforBone = Transpose[{";
+			//outStream << "{" << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << "}" << ",";
+			//outStream << "{" << m[4] << ", " << m[5] << ", " << m[6] << ", " << m[7] << "}" << ",";
+			//outStream << "{" << m[8] << ", " << m[9] << ", " << m[10] << ", " << m[11] << "}" << ",";
+			//outStream << "{" << m[12] << ", " << m[13] << ", " << m[14] << ", " << m[15] << "}" << "}]";
+			//outStream << std::endl << std::endl;
+
+			//outStream << "DualQuatForBone = {";
+			//outStream << qs << "," << qx << "," << qy << "," << qz << ",";
+			//outStream << dqs << "," << dqx << "," << dqy << "," << dqz;
+			//outStream << "}.dualQuatUnit";
+			//outStream << std::endl;
+			//outStream << "rotationMatrixFromDualQuat[dualQuatUnit]" << std::endl;
+
+			//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
+
+			//std::wstring resultString(outStream.str());
+			//DebugOutputString(resultString.c_str());
 		}
 	}
 

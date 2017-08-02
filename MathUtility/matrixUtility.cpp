@@ -57,7 +57,6 @@ namespace oxyde {
 				std::sqrt((std::pow(std::abs(eVec2[0] + eVec3[0]), 2) + std::pow(std::abs(eVec2[1] + eVec3[1]), 2) + std::pow(std::abs(eVec2[2] + eVec3[2]), 2))*
 				(std::pow(std::abs(eVal2*eVec2[0] + eVal3*eVec3[0]), 2) + std::pow(std::abs(eVal2*eVec2[1] + eVal3*eVec3[1]), 2) + std::pow(std::abs(eVal2*eVec2[2] + eVal3*eVec3[2]), 2))));
 
-
 			//oxyde::math::complex eulerForm(cosTheta, std::real(sinTheta));
 
 			//cout << endl;
@@ -78,7 +77,7 @@ namespace oxyde {
 			double sinTheta = 0.0;
 			getDualQuaternionParametersFromMatrix(m, cosTheta, sinTheta, nx, ny, nz, slide, mx, my, mz);
 			complex euler(cosTheta, sinTheta);
-			angle = std::real(complex(0, -1)*(std::log(euler)));
+			angle = 6.28319 +std::real(complex(0, -1)*(std::log(euler)));
 		}
 
 		void getDualQuaternionFromMatrix(double m[], float &qs, float &qx, float &qy, float &qz, float &dqs, float &dqx, float &dqy, float &dqz)

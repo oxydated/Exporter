@@ -9,6 +9,8 @@
 #include <msxml6.h>
 #include <comutil.h>
 #include <tchar.h>
+#include <string>
+#include <sstream>
 
 IXMLDOMDocument3* getTheDocument();
 //<document>
@@ -83,5 +85,13 @@ IXMLDOMElement* getTransformationsElement();
 
 //</document>
 void closeFile(const _TCHAR *name);
+
+namespace oxyde {
+	namespace exporter {
+		namespace XML {
+			HRESULT insertFloatAttributeInElement(IXMLDOMElement* Element, std::wstring attribute, float value);
+		}
+	}
+}
 
 #endif

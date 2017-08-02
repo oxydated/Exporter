@@ -60,6 +60,23 @@ IXMLDOMElement* insertMatrixKeyForTrack(IXMLDOMElement* theMatrixTrackElement, i
 //	< / keyFrames>
 
 
+//	<dualQuatTrack numKeys = "4">
+
+IXMLDOMElement* insertDualQuatTrackForAnimation(IXMLDOMElement* theAnimationElement, int numKeys);
+
+//		<dualQuatKey endTime = "1920" startTime = "0">
+//			<startingDualQuat dqs = "18.9034051923" dqx = "-1.80157197614" dqy = "4.73357663621" dqz = "18.3896327619" qs = "-0.704931942828" qx = "-0.0554221582912" qy = "0.0554220868291" qz = "0.704931012683" / >
+//			<interpolationParam angle = "1.07338548242" mx = "5.19451577995" my = "-65.2207235594" mz = "26.2562274777" slide = "-3.22213938438" ux = "0.996814664527" uy = "0.0568904504045" uz = "-0.0558927655092" / >
+//		< / dualQuatKey>
+
+IXMLDOMElement* insertDualQuatKeyForTrack(IXMLDOMElement* theDualQuatTrackElement,
+	int startTime, int endTime,
+	float qs, float qx, float qy, float qz, float dqs, float dqx, float dqy, float dqz,
+	float angle, float ux, float uy, float uz, float slide, float mx, float my, float mz
+);
+
+//	< / dualQuatTrack>
+
 //	<baseSpinningBone source = "source" l0c0="1.0" l0c1="1.0" l0c2="1.0" l1c0="1.0" l1c1="1.0" l1c2="1.0" l2c0="1.0" l2c1="1.0" l2c2="1.0" l3c0="1.0" l3c1="1.0" l3c2="1.0" / >
 
 IXMLDOMElement* insertBaseSpinningBoneForAnimation(IXMLDOMElement* theAnimationElement, _TCHAR* source, float l0c0, float l0c1, float l0c2, float l1c0, float l1c1, float l1c2, float l2c0, float l2c1, float l2c2, float l3c0, float l3c1, float l3c2);

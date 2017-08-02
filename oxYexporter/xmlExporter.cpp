@@ -288,3 +288,24 @@ IXMLDOMElement* insertVertexForMesh( IXMLDOMElement* meshNode, int ID, int theVe
 	
 	return theNewVerticeElement;
 }
+
+namespace {
+	std::wstring outStr;
+	std::wstring resultString;
+	std::wostringstream outStream(outStr);
+}
+
+namespace oxyde {
+	namespace exporter {
+		namespace XML {
+			HRESULT insertFloatAttributeInElement(IXMLDOMElement * Element, std::wstring attribute, float value)
+			{
+				outStream << std::fixed << value;
+				resultString = outStream.str();
+				hr = Element->setAttribute(SysAllocString(attribute.c_str()), _variant_t(resultString.c_str()));
+				outStream.str(outStr);
+				return hr;
+			}
+		}
+	}
+}

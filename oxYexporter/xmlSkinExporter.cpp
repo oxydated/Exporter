@@ -92,21 +92,37 @@ IXMLDOMElement* insertObjectTMforBone(IXMLDOMElement* boneNode, Matrix3 theBoneT
 	theDocument = getTheDocument();
 	IXMLDOMElement* theObjectTMElement = NULL;
 	hr = theDocument->createElement(L"boneMatrix", &theObjectTMElement);
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c0"), _variant_t(theBoneTM.GetRow(0).x));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c1"), _variant_t(theBoneTM.GetRow(0).y));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c2"), _variant_t(theBoneTM.GetRow(0).z));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c0"), _variant_t(theBoneTM.GetRow(0).x));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c1"), _variant_t(theBoneTM.GetRow(0).y));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r0c2"), _variant_t(theBoneTM.GetRow(0).z));
 
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c0"), _variant_t(theBoneTM.GetRow(1).x));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c1"), _variant_t(theBoneTM.GetRow(1).y));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c2"), _variant_t(theBoneTM.GetRow(1).z));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c0"), _variant_t(theBoneTM.GetRow(1).x));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c1"), _variant_t(theBoneTM.GetRow(1).y));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r1c2"), _variant_t(theBoneTM.GetRow(1).z));
 
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c0"), _variant_t(theBoneTM.GetRow(2).x));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c1"), _variant_t(theBoneTM.GetRow(2).y));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c2"), _variant_t(theBoneTM.GetRow(2).z));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c0"), _variant_t(theBoneTM.GetRow(2).x));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c1"), _variant_t(theBoneTM.GetRow(2).y));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r2c2"), _variant_t(theBoneTM.GetRow(2).z));
 
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c0"), _variant_t(theBoneTM.GetRow(3).x));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c1"), _variant_t(theBoneTM.GetRow(3).y));
-	hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c2"), _variant_t(theBoneTM.GetRow(3).z));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c0"), _variant_t(theBoneTM.GetRow(3).x));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c1"), _variant_t(theBoneTM.GetRow(3).y));
+	//hr = theObjectTMElement->setAttribute(SysAllocString(L"r3c2"), _variant_t(theBoneTM.GetRow(3).z));
+
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r0c0",theBoneTM.GetRow(0).x);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r0c1",theBoneTM.GetRow(0).y);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r0c2",theBoneTM.GetRow(0).z);
+
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r1c0",theBoneTM.GetRow(1).x);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r1c1",theBoneTM.GetRow(1).y);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r1c2",theBoneTM.GetRow(1).z);
+
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r2c0",theBoneTM.GetRow(2).x);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r2c1",theBoneTM.GetRow(2).y);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r2c2",theBoneTM.GetRow(2).z);
+
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r3c0",theBoneTM.GetRow(3).x);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r3c1",theBoneTM.GetRow(3).y);
+	hr = oxyde::exporter::XML::insertFloatAttributeInElement(theObjectTMElement, L"r3c2",theBoneTM.GetRow(3).z);
 
 	hr = boneNode->appendChild(theObjectTMElement, NULL);
 	return theObjectTMElement;
@@ -123,15 +139,24 @@ IXMLDOMElement* insertDualQuatForBone(IXMLDOMElement* boneNode, float qs, float 
 	IXMLDOMElement* theDualQuatElement = NULL;
 
 	hr = theDocument->createElement(L"boneDualQuat", &theDualQuatElement);
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"qs"), _variant_t(qs));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"qx"), _variant_t(qx));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"qy"), _variant_t(qy));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"qz"), _variant_t(qz));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"qs"), _variant_t(qs));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"qx"), _variant_t(qx));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"qy"), _variant_t(qy));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"qz"), _variant_t(qz));
 
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqs"), _variant_t(dqs));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqx"), _variant_t(dqx));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqy"), _variant_t(dqy));
-	hr = theDualQuatElement->setAttribute(SysAllocString(L"dqz"), _variant_t(dqz));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"dqs"), _variant_t(dqs));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"dqx"), _variant_t(dqx));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"dqy"), _variant_t(dqy));
+	//hr = theDualQuatElement->setAttribute(SysAllocString(L"dqz"), _variant_t(dqz));
+
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"qs", qs);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"qx", qx);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"qy", qy);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"qz", qz);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"dqs", dqs);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"dqx", dqx);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"dqy", dqy);
+	oxyde::exporter::XML::insertFloatAttributeInElement(theDualQuatElement, L"dqz", dqz);
 
 	hr = boneNode->appendChild(theDualQuatElement, NULL);
 	return theDualQuatElement;

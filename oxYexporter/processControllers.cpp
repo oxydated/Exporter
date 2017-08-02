@@ -44,7 +44,7 @@ void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* the
 
 		/// Controller Extractor Test
 		auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(theTMControl, theNode);
-		theControllerExtractor->exportController();
+		theControllerExtractor->exportController(theAnimationElement);
 
 	} else {
 		DebugPrint(L"%*sNo Control for node %s\n", indent, " ", theNode->GetName());
