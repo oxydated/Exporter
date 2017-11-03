@@ -77,7 +77,8 @@ namespace oxyde {
 			double sinTheta = 0.0;
 			getDualQuaternionParametersFromMatrix(m, cosTheta, sinTheta, nx, ny, nz, slide, mx, my, mz);
 			complex euler(cosTheta, sinTheta);
-			angle = 6.28319 +std::real(complex(0, -1)*(std::log(euler)));
+			//angle = 6.28319 +std::real(complex(0, -1)*(std::log(euler)));
+			angle = std::real(complex(0, -1)*(std::log(euler)));
 		}
 
 		void getDualQuaternionFromMatrix(double m[], float &qs, float &qx, float &qy, float &qz, float &dqs, float &dqx, float &dqy, float &dqz)

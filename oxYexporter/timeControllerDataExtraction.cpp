@@ -72,6 +72,9 @@ namespace oxyde {
 				std::vector<std::pair<dualQuatKey, dualQuatKey>> intervals;
 
 				dualQuatKey formerValue;
+
+				double formerMatrix[16];
+
 				for (auto timeIntervalEnd = keyTimes.begin(); timeIntervalEnd != keyTimes.end(); timeIntervalEnd++) {
 
 					std::wstring outStr;
@@ -81,7 +84,7 @@ namespace oxyde {
 
 					float quat[8];
 
-					//getDualQuatForTime(*timeIntervalEnd, quat);
+					getDualQuatForTime(*timeIntervalEnd, quat);
 
 					//oxyde::log::printLine();
 					//oxyde::log::printDualQuat(L"fromControllers", quat);
@@ -154,9 +157,214 @@ namespace oxyde {
 					DebugOutputString(resultString.c_str());
 
 					if (timeIntervalEnd != keyTimes.begin()) {
+						//TimeValue halfTime = formerValue.first + (currentKey.first - formerValue.first) / 2;
+
+						oxyde::log::printNamedParameter(L"formerTime", formerValue.first);
+						oxyde::log::printNamedParameter(L"CurrentTime", currentKey.first);
+						//oxyde::log::printNamedParameter(L"halfTime", halfTime);
+
+
+
+						float angleForPoint = 0;
+						float quatAngle = 0;
+
+						float startQ[8] = { formerValue.second[0], formerValue.second[1], formerValue.second[2], formerValue.second[3],
+							formerValue.second[4],formerValue.second[5], formerValue.second[6], formerValue.second[7] };
+
+						float endQ[8] = { currentKey.second[0], currentKey.second[1], currentKey.second[2],currentKey.second[3],
+							currentKey.second[4], currentKey.second[5], currentKey.second[6], currentKey.second[7] };
+
+						float transQ[8] = { 0., 0. , 0. , 0. , 0. , 0. , 0. , 0. };
+
+						oxyde::DQ::transformFromSourceToDestinationAxis(
+							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+							endQ[0], endQ[1], endQ[2], endQ[3], endQ[4], endQ[5], endQ[6], endQ[7],
+							transQ[0], transQ[1], transQ[2], transQ[3], transQ[4], transQ[5], transQ[6], transQ[7]
+						);
+
+						oxyde::log::printDualQuat(L"startQ", startQ);
+						oxyde::log::printDualQuat(L"endQ", endQ);
+						oxyde::log::printDualQuat(L"transQ", transQ);
+
+						oxyde::DQ::dualQuatParameters transQParameters;
+
+						oxyde::DQ::extractDualVersorParameters(
+							DUALQUAARRAY(transQ),
+							transQParameters
+						);
+
+						double angleQ = 2 * oxyde::math::getAngleFromCosAndSin(transQParameters.qS, transQParameters.theSin);
+						double complementAngleQ = 2 * oxyde::math::getAngleFromCosAndSin(-transQParameters.qS, -transQParameters.theSin);
+
+						oxyde::log::printNamedParameter(L"angleQ", angleQ);
+						oxyde::log::printNamedParameter(L"complementAngleQ", complementAngleQ);
+
+
+						double lm[16];
+
+						//DUALQUAVAR(halfTimeQuat);
+						//DUALQUAVAR(halfTimePointTransformed);
+
+						//oxyde::math::getDualQuaternionFromMatrix(lm, DUALQUACOMP(halfTimeQuat));
+						//float halfTimePoint[8];
+						//oxyde::DQ::point_quaternion(0, 0, 0, DUALQUAARRAY(halfTimePoint));
+
+						////float pointInStartQSpace[8];
+						//oxyde::DQ::dual_quat_transform_point(DUALQUACOMP(halfTimeQuat),
+						//	DUALQUAARRAY(halfTimePoint),
+						//	DUALQUACOMP(halfTimePointTransformed));
+
+
+						//oxyde::log::printDualQuat(L"halfTimeQuat", DUALQUACOMP(halfTimeQuat));
+						//oxyde::log::printDualQuat(L"halfTimePointTransformed", DUALQUACOMP(halfTimePointTransformed));
+
+						//getLocalMatrixForTime(halfTime, lm);
+
+						double inverseFormerMatrix[16];
+						oxyde::math::invertMatrix(formerMatrix, inverseFormerMatrix);
+
+						float formerMatrixFloat[16] = { formerMatrix[0], formerMatrix[1], formerMatrix[2], formerMatrix[3],
+							formerMatrix[4], formerMatrix[5], formerMatrix[6], formerMatrix[7],
+							formerMatrix[8], formerMatrix[9], formerMatrix[10], formerMatrix[11],
+							formerMatrix[12], formerMatrix[13], formerMatrix[14], formerMatrix[15] };
+
+						float inverseFormerMatrixFloat[16] = { inverseFormerMatrix[0], inverseFormerMatrix[1], inverseFormerMatrix[2], inverseFormerMatrix[3],
+							inverseFormerMatrix[4], inverseFormerMatrix[5], inverseFormerMatrix[6], inverseFormerMatrix[7],
+							inverseFormerMatrix[8], inverseFormerMatrix[9], inverseFormerMatrix[10], inverseFormerMatrix[11],
+							inverseFormerMatrix[12], inverseFormerMatrix[13], inverseFormerMatrix[14], inverseFormerMatrix[15] };
+
+						oxyde::log::printMatrix(L"formerMatrix", formerMatrixFloat);
+						oxyde::log::printMatrix(L"inverseFormerMatrix", inverseFormerMatrixFloat);
+
+						oxyde::log::printLine();
+						oxyde::log::printText(L"{");
+
+						double angleDeviation = 0;
+						double complementAngleDeviation = 0;
+
+						for (int i = 0; i < 11; i++) {
+							float alpha = float(i) / 10.0;
+							TimeValue iTime = formerValue.first*(1 - alpha) + currentKey.first*(alpha);
+							double interpolatedAngle = angleQ*alpha;
+							double interpolatedComplementAngle = complementAngleQ*alpha;
+
+							getLocalMatrixForTime(iTime, lm);
+
+							float matrixAtHalfTime[16] = { lm[0], lm[1], lm[2], lm[3], lm[4], lm[5], lm[6], lm[7], lm[8], lm[9], lm[10], lm[11], lm[12], lm[13], lm[14], lm[15] };
+
+							oxyde::log::printMatrix(L"lm", matrixAtHalfTime);
+
+							//
+							double intervalMatrix[16];
+							oxyde::math::multiplyMatrices(lm, inverseFormerMatrix, intervalMatrix);
+
+							float intervalMatrixFloat[16] = { intervalMatrix[0], intervalMatrix[1], intervalMatrix[2], intervalMatrix[3],
+								intervalMatrix[4], intervalMatrix[5], intervalMatrix[6], intervalMatrix[7],
+								intervalMatrix[8], intervalMatrix[9], intervalMatrix[10], intervalMatrix[11],
+								intervalMatrix[12], intervalMatrix[13], intervalMatrix[14], intervalMatrix[15] };
+
+							oxyde::log::printMatrix(L"intervalMatrix", intervalMatrixFloat);
+
+							float px = intervalMatrix[12], py = intervalMatrix[13], pz = intervalMatrix[14];
+
+							oxyde::log::printPointInSpace(L"pPoint", px, py, pz);
+							oxyde::DQ::getAngleForPointAroundQuatAxis(DUALQUAARRAY(transQ), px, py, pz, angleForPoint, quatAngle);
+
+							oxyde::log::printNamedParameter(L"angleForPoint", angleForPoint);
+							oxyde::log::printNamedParameter(L"interpolatedAngle", interpolatedAngle);
+							oxyde::log::printNamedParameter(L"interpolatedComplementAngle", interpolatedComplementAngle);
+
+							angleDeviation += std::abs(angleForPoint - interpolatedAngle);
+							complementAngleDeviation += std::abs(angleForPoint - interpolatedComplementAngle);
+						}
+						oxyde::log::printText(L"}");
+						oxyde::log::printLine();
+
+						//
+						if (std::fabs(transQ[0] - 1.0) > 0.0009) {
+
+							/*bool complementQuat = false;*/
+							/*oxyde::DQ::getAngleForPointAroundQuatAxis(DUALQUAARRAY(transQ), px, py, pz, angleForPoint, quatAngle);
+							if (quatAngle > 0.0) {
+								if (angleForPoint <0.0 || angleForPoint > quatAngle) {
+									complementQuat = true;
+								}
+							}
+							else {
+								if (angleForPoint > 0.0 || angleForPoint < quatAngle) {
+									complementQuat = true;
+								}
+							}*/
+
+							bool complementQuat = angleDeviation > complementAngleDeviation;
+
+
+							if (complementQuat) {
+								oxyde::log::printText(L"complementQuat");
+								currentKey.second[0] = -currentKey.second[0];
+								currentKey.second[1] = -currentKey.second[1];
+								currentKey.second[2] = -currentKey.second[2];
+								currentKey.second[3] = -currentKey.second[3];
+								currentKey.second[4] = -currentKey.second[4];
+								currentKey.second[5] = -currentKey.second[5];
+								currentKey.second[6] = -currentKey.second[6];
+								currentKey.second[7] = -currentKey.second[7];
+							}
+						}
+
 						intervals.push_back(std::pair<dualQuatKey, dualQuatKey>(formerValue, currentKey));
+
+						/*oxyde::log::printLine();
+						oxyde::log::printText(L"{");
+						for (int i = 0; i < 11; i++) {
+							float alpha = float(i) / 10.0;
+							TimeValue iTime = formerValue.first*(1- alpha)+ currentKey.first*(alpha);
+							getLocalMatrixForTime(iTime, lm);
+
+							matrixAtHalfTime[0] = lm[0];
+							matrixAtHalfTime[1] = lm[1];
+							matrixAtHalfTime[2] = lm[2];
+							matrixAtHalfTime[3] = lm[3];
+							matrixAtHalfTime[4] = lm[4];
+							matrixAtHalfTime[5] = lm[5];
+							matrixAtHalfTime[6] = lm[6];
+							matrixAtHalfTime[7] = lm[7];
+							matrixAtHalfTime[8] = lm[8];
+							matrixAtHalfTime[9] = lm[9];
+							matrixAtHalfTime[10] = lm[10];
+							matrixAtHalfTime[11] = lm[11];
+							matrixAtHalfTime[12] = lm[12];
+							matrixAtHalfTime[13] = lm[13];
+							matrixAtHalfTime[14] = lm[14];
+							matrixAtHalfTime[15] = lm[15];
+
+							oxyde::log::printText(L"{");
+							oxyde::log::printNamedParameter(L"time", iTime);
+							oxyde::log::printText(L",");
+							oxyde::log::printMatrix(L"matrixAtInterval", matrixAtHalfTime);
+							oxyde::log::printText(L"},");
+
+						}
+						oxyde::log::printText(L"}");
+						oxyde::log::printLine();*/
 					}
 					formerValue = currentKey;
+					formerMatrix[0] = m[0];
+					formerMatrix[1] = m[1];
+					formerMatrix[2] = m[2];
+					formerMatrix[3] = m[3];
+					formerMatrix[4] = m[4];
+					formerMatrix[5] = m[5];
+					formerMatrix[6] = m[6];
+					formerMatrix[7] = m[7];
+					formerMatrix[8] = m[8];
+					formerMatrix[9] = m[9];
+					formerMatrix[10] = m[10];
+					formerMatrix[11] = m[11];
+					formerMatrix[12] = m[12];
+					formerMatrix[13] = m[13];
+					formerMatrix[14] = m[14];
+					formerMatrix[15] = m[15];
 				}
 
 				if (keyTimes.size() == 1) {
@@ -196,12 +404,12 @@ namespace oxyde {
 					float halfQ[8];
 					oxyde::math::getDualQuaternionFromMatrix(m, DUALQUAARRAY(halfQ));
 
-					//oxyde::log::printDualQuat(L"halfQ", halfQ);
+					oxyde::log::printDualQuat(L"halfQ", halfQ);
 
 					float fromStartToHalfQ[8];
 					oxyde::DQ::transformFromSourceToDestinationAxis(DUALQUAARRAY(startQ), DUALQUAARRAY(halfQ), DUALQUAARRAY(fromStartToHalfQ));
 
-					//oxyde::log::printDualQuat(L"fromStartToHalfQ", fromStartToHalfQ);
+					oxyde::log::printDualQuat(L"fromStartToHalfQ", fromStartToHalfQ);
 
 					oxyde::DQ::dualQuatParameters theHalfwayParameters;
 
@@ -320,7 +528,7 @@ namespace oxyde {
 						DUALQUAARRAY(zeroPoint),
 						DUALQUAARRAY(pointHalfWay));
 
-					//oxyde::log::printDualQuat(L"pointHalfWay", pointHalfWay);
+					oxyde::log::printDualQuat(L"pointHalfWay", pointHalfWay);
 
 					float halfwayToQ[3] = { pointHalfWay[5] - transformedByQ[5], pointHalfWay[6] - transformedByQ[6], pointHalfWay[7] - transformedByQ[7] };
 					float distFromHalfwayToQ = 0.;
@@ -337,7 +545,10 @@ namespace oxyde {
 					float transQSanityCheck[8];
 
 					if (pair.first.first != pair.second.first) {
+/*
 						if (distFromHalfwayToQ > distFromHalfwayToQc) {
+							oxyde::log::printText(L"distFromHalfwayToQ > distFromHalfwayToQc");
+
 							insertDualQuatKeyForTrack(theDualQuatTrackElement,
 								pair.first.first, pair.second.first,
 								startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
@@ -379,6 +590,26 @@ namespace oxyde {
 								DUALQUAARRAY(transQSanityCheck)
 							);
 						}
+*/
+						insertDualQuatKeyForTrack(theDualQuatTrackElement,
+							pair.first.first, pair.second.first,
+							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+							angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
+						);
+
+						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
+							transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
+							angleQ, transQParameters.theSfactor,
+							transQParameters.Mx, transQParameters.My, transQParameters.Mz
+						);
+
+						oxyde::DQ::dual_Versor(
+							angleQ,
+							transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
+							transQParameters.theSfactor,
+							transQParameters.Mx, transQParameters.My, transQParameters.Mz,
+							DUALQUAARRAY(transQSanityCheck)
+						);
 					}
 					else {
 						insertDualQuatKeyForTrack(theDualQuatTrackElement,

@@ -27,6 +27,10 @@ namespace oxyde {
 		void rotationEigenValuesAndVectors(const double m[], complex& eVal1, complex& eVal2, complex& eVal3, complex eVec1[], complex eVec2[], complex eVec3[]);
 
 		double getAngleFromCosAndSin(double cosTheta, double sinTheta);
+
+		void invertMatrix(const double m[], double o[]);
+
+		void multiplyMatrices(const double m[], const double n[], double o[]);
 	}
 
 }
