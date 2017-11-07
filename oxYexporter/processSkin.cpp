@@ -4,6 +4,7 @@
 #include "matrixUtility.h"
 #include "debugLog.h"
 #include "dualQuaternionMath.h"
+#include "skinDataExtraction.h"
 
 bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	bool thereIsASkinModifier = false;
@@ -19,7 +20,12 @@ bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	return thereIsASkinModifier;
 }
 
-bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName, FILE* expFile){
+//bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName, FILE* expFile){
+bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName) {
+
+	using dualQuat = std::array<double, 8>;
+	using matrix4x4 = std::array<double, 16>;
+
 	if (!isThereASkinModifier(theDerivedObj)) return false;
 	
 	static int skinID = 0;
@@ -44,7 +50,8 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	///////////////// extracting the mesh data for the skin object
 
-	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack, expFile);
+	//int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack, expFile);
+	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack);
 
 	int thisSkin = skinID++;
 
@@ -55,95 +62,45 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	Matrix3 theMatrix;
 	theSkinInterface->GetSkinInitTM(theNode, theMatrix);
-	DebugPrint(L"	SkinInitTM row 0: (%10f, %10f, %10f)\n", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-	DebugPrint(L"	SkinInitTM row 1: (%10f, %10f, %10f)\n", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-	DebugPrint(L"	SkinInitTM row 2: (%10f, %10f, %10f)\n", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-	DebugPrint(L"	SkinInitTM row 3: (%10f, %10f, %10f)\n\n", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 	Matrix3 theObjectTM = theNode->GetObjectTM(0);
-	DebugPrint(L"	ObjectTM row 0: (%10f, %10f, %10f)\n", theObjectTM.GetRow(0).x, theObjectTM.GetRow(0).y, theObjectTM.GetRow(0).z);
-	DebugPrint(L"	ObjectTM row 1: (%10f, %10f, %10f)\n", theObjectTM.GetRow(1).x, theObjectTM.GetRow(1).y, theObjectTM.GetRow(1).z);
-	DebugPrint(L"	ObjectTM row 2: (%10f, %10f, %10f)\n", theObjectTM.GetRow(2).x, theObjectTM.GetRow(2).y, theObjectTM.GetRow(2).z);
-	DebugPrint(L"	ObjectTM row 3: (%10f, %10f, %10f)\n\n", theObjectTM.GetRow(3).x, theObjectTM.GetRow(3).y, theObjectTM.GetRow(3).z);
 
 	insertObjectTMforSkin(skinNode, theObjectTM);
 
+	oxyde::exporter::skin::skinPoseCorrector theSkinPoseCorrector(theSkinInterface);
+
 	for (int i = 0; i < numBones; i++){
 		INode* theBoneNode = theSkinInterface->GetBone(i);
-		DebugPrint(L"Name of the bone %i: %s\n", i, theBoneNode->GetName());
 
 		theSkinInterface->GetBoneInitTM(theBoneNode, theMatrix);
-		DebugPrint(L"	Bone %i InitTM row 0: (%10f, %10f, %10f)\n", i, theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-		DebugPrint(L"	Bone %i InitTM row 1: (%10f, %10f, %10f)\n", i, theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-		DebugPrint(L"	Bone %i InitTM row 2: (%10f, %10f, %10f)\n", i, theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-		DebugPrint(L"	Bone %i InitTM row 3: (%10f, %10f, %10f)\n\n", i, theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 		IXMLDOMElement* theNewBoneElement = insertBoneForSkin(skinNode, (_TCHAR*)theBoneNode->GetName(), i);
 		if (theNewBoneElement != NULL){
 			insertObjectTMforBone(theNewBoneElement, theMatrix);
 			
-			double m[16];
-			m[0] = theMatrix.GetRow(0).x;		m[1] = theMatrix.GetRow(0).y;		m[2] = theMatrix.GetRow(0).z;		m[3] = 0.;
-			m[4] = theMatrix.GetRow(1).x;		m[5] = theMatrix.GetRow(1).y;		m[6] = theMatrix.GetRow(1).z;		m[7] = 0.;
-			m[8] = theMatrix.GetRow(2).x;		m[9] = theMatrix.GetRow(2).y;		m[10] = theMatrix.GetRow(2).z;		m[11] = 0.;
-			m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
-			float qs, qx, qy, qz, dqs, dqx, dqy, dqz;
-			oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+			//double m[16];
+			//m[0] = theMatrix.GetRow(0).x;		m[1] = theMatrix.GetRow(0).y;		m[2] = theMatrix.GetRow(0).z;		m[3] = 0.;
+			//m[4] = theMatrix.GetRow(1).x;		m[5] = theMatrix.GetRow(1).y;		m[6] = theMatrix.GetRow(1).z;		m[7] = 0.;
+			//m[8] = theMatrix.GetRow(2).x;		m[9] = theMatrix.GetRow(2).y;		m[10] = theMatrix.GetRow(2).z;		m[11] = 0.;
+			//m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
+			//float qs, qx, qy, qz, dqs, dqx, dqy, dqz;
+			//oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
 
-			float qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz;
+			//float qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz;
+
+			dualQuat q = theSkinPoseCorrector.getSkinPosedualQuatForNode(theBoneNode);
 
 			oxyde::log::printLine();
-			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUACOMP(q));
+			//oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUACOMP(q));
+			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUAARRAY(q));
 			
-			oxyde::DQ::dual_quaternion_complement(DUALQUACOMP(q), DUALQUACOMP(qC));
+			//oxyde::DQ::dual_quaternion_complement(DUALQUACOMP(q), DUALQUACOMP(qC));
 
-			oxyde::log::printDualQuat(L"DualQuatforBoneqC", DUALQUACOMP(qC));
+			//oxyde::log::printDualQuat(L"DualQuatforBoneqC", DUALQUACOMP(qC));
 
-			//insertDualQuatForBone(theNewBoneElement, qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz);
-			insertDualQuatForBone(theNewBoneElement, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+			//insertDualQuatForBone(theNewBoneElement, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+			insertDualQuatForBone(theNewBoneElement, DUALQUAARRAY(q));
 
-			//float mf[16];
-			//for (int i = 0; i < 16; i++)mf[i] = m[i];
-
-			//oxyde::log::printLine();
-			//oxyde::log::printMatrix(L"ObjectTMforBone", mf);
-			//oxyde::log::printDualQuat(L"DualQuatforBone",DUALQUACOMP(q));
-			//oxyde::log::printText(L"\nWith modified matrix\n" );
-
-			//m[0] = theMatrix.GetRow(0).x;		m[4] = theMatrix.GetRow(0).y;		m[8] = theMatrix.GetRow(0).z;		m[3] = 0.;
-			//m[1] = theMatrix.GetRow(1).x;		m[5] = theMatrix.GetRow(1).y;		m[9] = theMatrix.GetRow(1).z;		m[7] = 0.;
-			//m[2] = theMatrix.GetRow(2).x;		m[6] = theMatrix.GetRow(2).y;		m[10] = theMatrix.GetRow(2).z;		m[11] = 0.;
-			//m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
-			//for (int i = 0; i < 16; i++)mf[i] = m[i];
-
-			//oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
-			//oxyde::log::printMatrix(L"ModifiedTMforBone", mf);
-			//oxyde::log::printDualQuat(L"ModifiedDualQuatforBone", DUALQUACOMP(q));
-
-
-
-			//std::wstring outStr;
-			//std::wostringstream outStream(outStr);
-			//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
-
-			//outStream << "ObjectTMforBone = Transpose[{";
-			//outStream << "{" << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << "}" << ",";
-			//outStream << "{" << m[4] << ", " << m[5] << ", " << m[6] << ", " << m[7] << "}" << ",";
-			//outStream << "{" << m[8] << ", " << m[9] << ", " << m[10] << ", " << m[11] << "}" << ",";
-			//outStream << "{" << m[12] << ", " << m[13] << ", " << m[14] << ", " << m[15] << "}" << "}]";
-			//outStream << std::endl << std::endl;
-
-			//outStream << "DualQuatForBone = {";
-			//outStream << qs << "," << qx << "," << qy << "," << qz << ",";
-			//outStream << dqs << "," << dqx << "," << dqy << "," << dqz;
-			//outStream << "}.dualQuatUnit";
-			//outStream << std::endl;
-			//outStream << "rotationMatrixFromDualQuat[dualQuatUnit]" << std::endl;
-
-			//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
-
-			//std::wstring resultString(outStream.str());
-			//DebugOutputString(resultString.c_str());
 		}
 	}
 
@@ -164,7 +121,8 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	return true;
 }
 
-int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, FILE* expFile){
+//int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, FILE* expFile){
+int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack) {
 	ObjectState theState;
 	int nextModifier = skinIndexInModifierStack + 1;
 	if (nextModifier == (theDerivedObj->NumModifiers())){
@@ -176,10 +134,10 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 
 	Matrix3* theMatrix_p = NULL;
 	theMatrix_p = theState.GetTM();
-	DebugPrint(L"	ObjectStateTM row 0: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(0).x, theMatrix_p->GetRow(0).y, theMatrix_p->GetRow(0).z);
-	DebugPrint(L"	ObjectStateTM row 1: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(1).x, theMatrix_p->GetRow(1).y, theMatrix_p->GetRow(1).z);
-	DebugPrint(L"	ObjectStateTM row 2: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(2).x, theMatrix_p->GetRow(2).y, theMatrix_p->GetRow(2).z);
-	DebugPrint(L"	ObjectStateTM row 3: (%10f, %10f, %10f)\n\n", theMatrix_p->GetRow(3).x, theMatrix_p->GetRow(3).y, theMatrix_p->GetRow(3).z);
+	//DebugPrint(L"	ObjectStateTM row 0: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(0).x, theMatrix_p->GetRow(0).y, theMatrix_p->GetRow(0).z);
+	//DebugPrint(L"	ObjectStateTM row 1: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(1).x, theMatrix_p->GetRow(1).y, theMatrix_p->GetRow(1).z);
+	//DebugPrint(L"	ObjectStateTM row 2: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(2).x, theMatrix_p->GetRow(2).y, theMatrix_p->GetRow(2).z);
+	//DebugPrint(L"	ObjectStateTM row 3: (%10f, %10f, %10f)\n\n", theMatrix_p->GetRow(3).x, theMatrix_p->GetRow(3).y, theMatrix_p->GetRow(3).z);
 
 	int meshID = -1;
 
@@ -189,7 +147,8 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 
 		////////////////////	actual mesh extraction process
 
-		meshID = processMesh(theMesh, expFile);
+		//meshID = processMesh(theMesh, expFile);
+		meshID = processMesh(theMesh);
 	}
 	return meshID;
 }

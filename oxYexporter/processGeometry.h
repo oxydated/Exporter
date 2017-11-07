@@ -215,9 +215,11 @@ private:
 
 Mesh& extractMeshFromObjectState(ObjectState theState, TimeValue t, bool &isGeometry);
 
-Mesh& extractMeshFromNode( INode* theNode, TimeValue t, bool &isGeometry, FILE* expFile = stdout );
+//Mesh& extractMeshFromNode( INode* theNode, TimeValue t, bool &isGeometry, FILE* expFile = stdout );
+Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry);
 
-int processMesh( Mesh &theMesh, FILE* expFile = stdout );
+//int processMesh( Mesh &theMesh, FILE* expFile = stdout );
+int processMesh(Mesh &theMesh);
 
 void getNormalsPerMeshFace( Mesh &theMesh, int theFace );
 

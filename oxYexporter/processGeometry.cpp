@@ -83,7 +83,8 @@ Mesh& extractMeshFromObjectState( ObjectState theState, TimeValue t, bool &isGeo
 	return Mesh();
 }
 
-Mesh& extractMeshFromNode( INode* theNode, TimeValue t, bool &isGeometry, FILE* expFile ){
+//Mesh& extractMeshFromNode( INode* theNode, TimeValue t, bool &isGeometry, FILE* expFile ){
+Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry) {
 	/*Object* theObject = theNode->EvalWorldState(t).obj;
 	if( (theObject != NULL) && (theObject->SuperClassID() == GEOMOBJECT_CLASS_ID) ){
 		if( ((GeomObject*)theObject)->CanConvertToType( Class_ID( TRIOBJ_CLASS_ID, 0 ) ) ){
@@ -101,54 +102,56 @@ Mesh& extractMeshFromNode( INode* theNode, TimeValue t, bool &isGeometry, FILE* 
 	return extractMeshFromObjectState(theNode->EvalWorldState(t), t, isGeometry );
 }
 
-int processMesh( Mesh &theMesh, FILE* expFile ){
+//int processMesh( Mesh &theMesh, FILE* expFile ){
+int processMesh(Mesh &theMesh) {
+
 	static int meshID = 0;
 	IXMLDOMElement *theMeshElement = NULL;
 
-	setOutputFile( expFile );
-	indentLine(); //0
-	
-	deIndentLine(); 
+	//setOutputFile( expFile );
+	//indentLine(); //0
+	//
+	//deIndentLine(); 
 	
 	int mp = 1;
 
 	theMesh.buildNormals();
 	
-	indentLine();//0
+	//indentLine();//0
 
 	for( int i=0; i< theMesh.getNumFaces(); i++){
 		
 		getNormalsPerMeshFace( theMesh, i );
 	}
-	deIndentLine();
+	//deIndentLine();
 
-	_snprintf( theString, 100, "\n/////////////////////////////////////////////////////////////////" ); printToOutput( theString );
-	_snprintf( theString, 100, "//////////////////////////////////////////////      vertexBuilder" ); printToOutput( theString );
-	_snprintf( theString, 100, "\n" ); printToOutput( theString );
+	//_snprintf( theString, 100, "\n/////////////////////////////////////////////////////////////////" ); printToOutput( theString );
+	//_snprintf( theString, 100, "//////////////////////////////////////////////      vertexBuilder" ); printToOutput( theString );
+	//_snprintf( theString, 100, "\n" ); printToOutput( theString );
 	
 	vertexBuilder::startBuilder( &theMesh, mp );
 
 	int thisMesh = meshID++;
 	theMeshElement = insertMeshByID(thisMesh, finalFace::getNumFinalFaces(), finalVertex::getNumFinals());
 	
-	_snprintf( theString, 100, "faces: \n%i\n", finalFace::getNumFinalFaces() ); printToOutput( theString );
+	//_snprintf( theString, 100, "faces: \n%i\n", finalFace::getNumFinalFaces() ); printToOutput( theString );
 
-	indentLine();//0
+	//indentLine();//0
 
 	for( int theFace = 0; theFace < finalFace::getNumFinalFaces(); theFace++ ){
 		int v0 = finalFace::getFace(theFace).getVertexForCorner(0);
 		int v1 = finalFace::getFace(theFace).getVertexForCorner(1);
 		int v2 = finalFace::getFace(theFace).getVertexForCorner(2);
 
-		_snprintf( theString, 100, "%i		%i %i %i\n",  theFace, v0, v1, v2 ); printToOutput( theString );
+		//_snprintf( theString, 100, "%i		%i %i %i\n",  theFace, v0, v1, v2 ); printToOutput( theString );
 		insertFaceForMesh( theMeshElement, theFace, v0, v1, v2 );
 	}
 
-	deIndentLine();
+	//deIndentLine();
 
-	_snprintf( theString, 100, "vertices: \n%i\n", finalVertex::getNumFinals() ); printToOutput( theString );
+	//_snprintf( theString, 100, "vertices: \n%i\n", finalVertex::getNumFinals() ); printToOutput( theString );
 
-	indentLine();//0
+	//indentLine();//0
 
 	for( int theFinal = 0; theFinal < finalVertex::getNumFinals(); theFinal++ ){
 		int theVert = finalVertex::getVertex(theFinal).getVert();
@@ -159,16 +162,16 @@ int processMesh( Mesh &theMesh, FILE* expFile ){
 		UVVert texCoord = vertexBuilder::getTexCoordForFinal(theFinal);
 		Point3 NormalVec = vertexBuilder::getNormalForFinal(theFinal);
 
-		_snprintf( theString, 100, "%i		%i		%f	%f	%f \n", theFinal, theVert, vertPos.x, vertPos.y, vertPos.z ); printToOutput( theString );
-		_snprintf( theString, 100, "		%i		%f	%f \n", theTVert, texCoord.x, texCoord.y ); printToOutput( theString );
-		_snprintf( theString, 100, "		%i		%f	%f	%f \n", theNormal, NormalVec.x, NormalVec.y, NormalVec.z  ); printToOutput( theString );
+		//_snprintf( theString, 100, "%i		%i		%f	%f	%f \n", theFinal, theVert, vertPos.x, vertPos.y, vertPos.z ); printToOutput( theString );
+		//_snprintf( theString, 100, "		%i		%f	%f \n", theTVert, texCoord.x, texCoord.y ); printToOutput( theString );
+		//_snprintf( theString, 100, "		%i		%f	%f	%f \n", theNormal, NormalVec.x, NormalVec.y, NormalVec.z  ); printToOutput( theString );
 
 		insertVertexForMesh( theMeshElement, theFinal,	theVert,	vertPos.x, vertPos.y, vertPos.z, 
 														theTVert,	texCoord.x, texCoord.y, 
 														theNormal,	NormalVec.x, NormalVec.y, NormalVec.z );
 	}
 	
-	deIndentLine();
+	//deIndentLine();
 
 	return thisMesh;
 }
@@ -176,7 +179,7 @@ int processMesh( Mesh &theMesh, FILE* expFile ){
 
 void getNormalsPerMeshFace( Mesh &theMesh, int theFace ){
 	
-	indentLine();//0
+	//indentLine();//0
 
 	MeshNormalSpec* theSpec = theMesh.GetSpecifiedNormals();
 
@@ -192,7 +195,7 @@ void getNormalsPerMeshFace( Mesh &theMesh, int theFace ){
 				Point3 &theNormal = theSpec->GetNormalArray()[ theNormalFace.GetNormalID(i) ];
 			}
 
-			deIndentLine();		
+			//deIndentLine();		
 
 			return;
 		}
@@ -221,5 +224,5 @@ void getNormalsPerMeshFace( Mesh &theMesh, int theFace ){
 		
 	}
 	
-	deIndentLine();
+	//deIndentLine();
 }

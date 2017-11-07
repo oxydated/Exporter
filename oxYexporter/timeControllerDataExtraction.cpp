@@ -11,6 +11,7 @@
 #include "dualQuaternionFunctions.h"
 #include "debugLog.h"
 #include "timeControllerDataExtraction.h"
+#include "skinDataExtraction.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -85,23 +86,12 @@ namespace oxyde {
 					float quat[8];
 
 					getDualQuatForTime(*timeIntervalEnd, quat);
-
-					//oxyde::log::printLine();
-					//oxyde::log::printDualQuat(L"fromControllers", quat);
-
+					
 					double m[16];
 					getLocalMatrixForTime(*timeIntervalEnd, m);
 
 					oxyde::log::printLine();
-
-					//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
 					float mFloat[16];
-					//outStream << "thisMatrix = Transpose[{";
-					//outStream << "{" << m[0] << ", " << m[1] << ", " << m[2] << ", " << m[3] << "}" << ",";
-					//outStream << "{" << m[4] << ", " << m[5] << ", " << m[6] << ", " << m[7] << "}" << ",";
-					//outStream << "{" << m[8] << ", " << m[9] << ", " << m[10] << ", " << m[11] << "}" << ",";
-					//outStream << "{" << m[12] << ", " << m[13] << ", " << m[14] << ", " << m[15] << "}" << "}]";
-					//outStream << std::endl << std::endl;
 
 					mFloat[0] = m[0];	mFloat[4] = m[4]; mFloat[8] = m[8];		mFloat[12] = m[12];
 					mFloat[1] = m[1];	mFloat[5] = m[5]; mFloat[9] = m[9];		mFloat[13] = m[13];
@@ -122,10 +112,7 @@ namespace oxyde {
 						angle, slide,
 						mx, my, mz
 					);
-					//outStream << "N[makeDualVersor[" << angle << ", {" << nx << "," << ny << "," << nz << " }, " << slide << ", {" << mx << "," << my << "," << mz << " }]]" << std::endl;
-					//outStream << std::endl;
 
-					//DUALQUAVAR(rC);
 					DUALQUAVAR(r);
 
 					oxyde::DQ::dual_Versor(angle,
@@ -136,34 +123,19 @@ namespace oxyde {
 
 					oxyde::log::printDualQuat(L"r", DUALQUACOMP(r));
 
-					//oxyde::DQ::dual_quaternion_complement(DUALQUACOMP(rC), DUALQUACOMP(r));
-
 					dualQuat currentQuat = { DUALQUACOMP(r) };
-					//dualQuat currentQuat = { DUALQUAARRAY(quat) };
 					dualQuatKey currentKey(*timeIntervalEnd, currentQuat);
-
-					//outStream << "{";
-					//outStream << currentQuat[0] << "," << currentQuat[1] << "," << currentQuat[2] << "," << currentQuat[3] << ",";
-					//outStream << currentQuat[4] << "," << currentQuat[5] << "," << currentQuat[6] << "," << currentQuat[7];
-					//outStream << "}";
-					//outStream << std::endl;
 
 					oxyde::log::printDualQuat(L"currentQuat", DUALQUAARRAY(currentQuat));
 					oxyde::log::printLine();
-
-					//outStream << std::endl << "______________________________________________________" << std::endl << std::endl;
 
 					std::wstring resultString(outStream.str());
 					DebugOutputString(resultString.c_str());
 
 					if (timeIntervalEnd != keyTimes.begin()) {
-						//TimeValue halfTime = formerValue.first + (currentKey.first - formerValue.first) / 2;
 
 						oxyde::log::printNamedParameter(L"formerTime", formerValue.first);
 						oxyde::log::printNamedParameter(L"CurrentTime", currentKey.first);
-						//oxyde::log::printNamedParameter(L"halfTime", halfTime);
-
-
 
 						float angleForPoint = 0;
 						float quatAngle = 0;
@@ -199,26 +171,7 @@ namespace oxyde {
 						oxyde::log::printNamedParameter(L"angleQ", angleQ);
 						oxyde::log::printNamedParameter(L"complementAngleQ", complementAngleQ);
 
-
 						double lm[16];
-
-						//DUALQUAVAR(halfTimeQuat);
-						//DUALQUAVAR(halfTimePointTransformed);
-
-						//oxyde::math::getDualQuaternionFromMatrix(lm, DUALQUACOMP(halfTimeQuat));
-						//float halfTimePoint[8];
-						//oxyde::DQ::point_quaternion(0, 0, 0, DUALQUAARRAY(halfTimePoint));
-
-						////float pointInStartQSpace[8];
-						//oxyde::DQ::dual_quat_transform_point(DUALQUACOMP(halfTimeQuat),
-						//	DUALQUAARRAY(halfTimePoint),
-						//	DUALQUACOMP(halfTimePointTransformed));
-
-
-						//oxyde::log::printDualQuat(L"halfTimeQuat", DUALQUACOMP(halfTimeQuat));
-						//oxyde::log::printDualQuat(L"halfTimePointTransformed", DUALQUACOMP(halfTimePointTransformed));
-
-						//getLocalMatrixForTime(halfTime, lm);
 
 						double inverseFormerMatrix[16];
 						oxyde::math::invertMatrix(formerMatrix, inverseFormerMatrix);
@@ -283,21 +236,7 @@ namespace oxyde {
 						//
 						if (std::fabs(transQ[0] - 1.0) > 0.0009) {
 
-							/*bool complementQuat = false;*/
-							/*oxyde::DQ::getAngleForPointAroundQuatAxis(DUALQUAARRAY(transQ), px, py, pz, angleForPoint, quatAngle);
-							if (quatAngle > 0.0) {
-								if (angleForPoint <0.0 || angleForPoint > quatAngle) {
-									complementQuat = true;
-								}
-							}
-							else {
-								if (angleForPoint > 0.0 || angleForPoint < quatAngle) {
-									complementQuat = true;
-								}
-							}*/
-
 							bool complementQuat = angleDeviation > complementAngleDeviation;
-
 
 							if (complementQuat) {
 								oxyde::log::printText(L"complementQuat");
@@ -314,39 +253,6 @@ namespace oxyde {
 
 						intervals.push_back(std::pair<dualQuatKey, dualQuatKey>(formerValue, currentKey));
 
-						/*oxyde::log::printLine();
-						oxyde::log::printText(L"{");
-						for (int i = 0; i < 11; i++) {
-							float alpha = float(i) / 10.0;
-							TimeValue iTime = formerValue.first*(1- alpha)+ currentKey.first*(alpha);
-							getLocalMatrixForTime(iTime, lm);
-
-							matrixAtHalfTime[0] = lm[0];
-							matrixAtHalfTime[1] = lm[1];
-							matrixAtHalfTime[2] = lm[2];
-							matrixAtHalfTime[3] = lm[3];
-							matrixAtHalfTime[4] = lm[4];
-							matrixAtHalfTime[5] = lm[5];
-							matrixAtHalfTime[6] = lm[6];
-							matrixAtHalfTime[7] = lm[7];
-							matrixAtHalfTime[8] = lm[8];
-							matrixAtHalfTime[9] = lm[9];
-							matrixAtHalfTime[10] = lm[10];
-							matrixAtHalfTime[11] = lm[11];
-							matrixAtHalfTime[12] = lm[12];
-							matrixAtHalfTime[13] = lm[13];
-							matrixAtHalfTime[14] = lm[14];
-							matrixAtHalfTime[15] = lm[15];
-
-							oxyde::log::printText(L"{");
-							oxyde::log::printNamedParameter(L"time", iTime);
-							oxyde::log::printText(L",");
-							oxyde::log::printMatrix(L"matrixAtInterval", matrixAtHalfTime);
-							oxyde::log::printText(L"},");
-
-						}
-						oxyde::log::printText(L"}");
-						oxyde::log::printLine();*/
 					}
 					formerValue = currentKey;
 					formerMatrix[0] = m[0];
@@ -420,18 +326,11 @@ namespace oxyde {
 
 					double halfwayAngle = 2 * oxyde::math::getAngleFromCosAndSin(theHalfwayParameters.qS, theHalfwayParameters.theSin);
 
-					//oxyde::log::printDualQuatParameters(L"theHalfwayParameters",
-					//	theHalfwayParameters.Ux, theHalfwayParameters.Uy, theHalfwayParameters.Uz,
-					//	halfwayAngle, theHalfwayParameters.theSfactor,
-					//	theHalfwayParameters.Mx, theHalfwayParameters.My, theHalfwayParameters.Mz
-					//);
 					////////////////////////////////////////////
 
 					oxyde::log::printDualQuat(L"startQ", startQ);
 
 					oxyde::log::printDualQuat(L"endQ", endQ);
-
-					//oxyde::log::printDualQuat(L"transQ", transQ);
 
 					oxyde::DQ::dualQuatParameters transQParameters;
 
@@ -442,12 +341,6 @@ namespace oxyde {
 
 					double angleQ = 2*oxyde::math::getAngleFromCosAndSin(transQParameters.qS, transQParameters.theSin);
 
-					//oxyde::log::printDualQuatParameters(L"transQParameters",
-					//	transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
-					//	angleQ, transQParameters.theSfactor,
-					//	transQParameters.Mx, transQParameters.My, transQParameters.Mz
-					//);
-
 					float sanityCheckQ[8];
 					oxyde::DQ::dual_Versor(angleQ,
 						transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
@@ -455,7 +348,6 @@ namespace oxyde {
 						transQParameters.Mx, transQParameters.My, transQParameters.Mz,
 						DUALQUAARRAY(sanityCheckQ));
 
-					//oxyde::log::printDualQuat(L"sanityCheckQ", sanityCheckQ);
 
 					///////////////////////////////////////////////////////////////////////
 					float fromParametersQ[8];
@@ -465,26 +357,13 @@ namespace oxyde {
 						transQParameters.Mx, transQParameters.My, transQParameters.Mz,
 						DUALQUAARRAY(fromParametersQ));
 
-					//oxyde::log::printDualQuat(L"fromParametersQ", fromParametersQ);
 					///////////////////////////////////////////////////////////////////////
-
-					//oxyde::log::printDualQuat(L"transQc", transQc);
 
 					oxyde::DQ::dualQuatParameters transQcParameters;
 					oxyde::DQ::complementDualVersorParameters(transQParameters, transQcParameters);
 
-					//oxyde::DQ::extractDualVersorParameters(
-					//	DUALQUAARRAY(transQc),
-					//	transQcParameters
-					//);
 
 					double angleQc = 2 * oxyde::math::getAngleFromCosAndSin(transQcParameters.qS, transQcParameters.theSin);
-
-					//oxyde::log::printDualQuatParameters(L"transQcParameters",
-					//	transQcParameters.Ux, transQcParameters.Uy, transQcParameters.Uz,
-					//	angleQc, transQcParameters.theSfactor,
-					//	transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz
-					//);
 
 					float sanityCheckQc[8];
 					oxyde::DQ::dual_Versor(angleQc,
@@ -493,7 +372,6 @@ namespace oxyde {
 						transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz,
 						DUALQUAARRAY(sanityCheckQc));
 
-					//oxyde::log::printDualQuat(L"sanityCheckQc", sanityCheckQc);
 
 					///////////////////////////////////////////////////////////////////////
 					float fromParametersQc[8];
@@ -502,8 +380,6 @@ namespace oxyde {
 						transQcParameters.theSfactor / 2.0,
 						transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz,
 						DUALQUAARRAY(fromParametersQc));
-
-					//oxyde::log::printDualQuat(L"fromParametersQc", fromParametersQc);
 
 					///////////////////////////////////////////////////////////////////////
 					float zeroPoint[8];
@@ -514,14 +390,10 @@ namespace oxyde {
 						DUALQUAARRAY(zeroPoint),
 						DUALQUAARRAY(transformedByQ));
 
-					//oxyde::log::printDualQuat(L"transformedByQ", transformedByQ);
-
 					float transformedByQc[8];
 					oxyde::DQ::dual_quat_transform_point(DUALQUAARRAY(fromParametersQc),
 						DUALQUAARRAY(zeroPoint),
 						DUALQUAARRAY(transformedByQc));
-
-					//oxyde::log::printDualQuat(L"transformedByQc", transformedByQc);
 
 					float pointHalfWay[8];
 					oxyde::DQ::dual_quat_transform_point(DUALQUAARRAY(fromStartToHalfQ),
@@ -541,56 +413,18 @@ namespace oxyde {
 
 					oxyde::log::printText(distFromHalfwayToQ > distFromHalfwayToQc ? L"transQc nearer to halfway point" : L"transQ nearer to halfway point");
 					///////////////////////////////////////////////////////////////////////
+
+					///Some code for skin pose correction
+					float angleInterp = 0;
+					float UxInterp = 1, UyInterp = 0, UzInterp = 0;
+					float sInterp = 0;
+					float MxInterp = 0, MyInterp = 0, MzInterp = 0;
+
 					
 					float transQSanityCheck[8];
 
 					if (pair.first.first != pair.second.first) {
-/*
-						if (distFromHalfwayToQ > distFromHalfwayToQc) {
-							oxyde::log::printText(L"distFromHalfwayToQ > distFromHalfwayToQc");
 
-							insertDualQuatKeyForTrack(theDualQuatTrackElement,
-								pair.first.first, pair.second.first,
-								startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
-								angleQc, transQcParameters.Ux, transQcParameters.Uy, transQcParameters.Uz, transQcParameters.theSfactor, transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz
-							);
-							
-							oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
-								transQcParameters.Ux, transQcParameters.Uy, transQcParameters.Uz,
-								angleQc, transQcParameters.theSfactor,
-								transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz
-							);
-
-							oxyde::DQ::dual_Versor(
-								angleQc, 
-								transQcParameters.Ux, transQcParameters.Uy, transQcParameters.Uz, 
-								transQcParameters.theSfactor, 
-								transQcParameters.Mx, transQcParameters.My, transQcParameters.Mz,
-								DUALQUAARRAY(transQSanityCheck)
-							);
-						}
-						else {
-							insertDualQuatKeyForTrack(theDualQuatTrackElement,
-								pair.first.first, pair.second.first,
-								startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
-								angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
-							);
-
-							oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
-								transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
-								angleQ, transQParameters.theSfactor,
-								transQParameters.Mx, transQParameters.My, transQParameters.Mz
-							);
-
-							oxyde::DQ::dual_Versor(
-								angleQ, 
-								transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, 
-								transQParameters.theSfactor, 
-								transQParameters.Mx, transQParameters.My, transQParameters.Mz,
-								DUALQUAARRAY(transQSanityCheck)
-							);
-						}
-*/
 						insertDualQuatKeyForTrack(theDualQuatTrackElement,
 							pair.first.first, pair.second.first,
 							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
@@ -610,6 +444,12 @@ namespace oxyde {
 							transQParameters.Mx, transQParameters.My, transQParameters.Mz,
 							DUALQUAARRAY(transQSanityCheck)
 						);
+
+						angleInterp = angleQ;
+						UxInterp = transQParameters.Ux, UyInterp = transQParameters.Uy, UzInterp = transQParameters.Uz;
+						sInterp = transQParameters.theSfactor;
+						MxInterp = transQParameters.Mx, MyInterp = transQParameters.My, MzInterp = transQParameters.Mz;
+
 					}
 					else {
 						insertDualQuatKeyForTrack(theDualQuatTrackElement,
@@ -625,6 +465,35 @@ namespace oxyde {
 						oxyde::DQ::dual_Versor(0., 1., 0., 0., 0., 0., 0., 0.,
 							DUALQUAARRAY(transQSanityCheck)
 						);
+					}
+
+					if (pair.first.first == 0) {
+						//float step = 0.0;
+						//if (pair.second.first > 0) {
+						//	step = 0.001 / double(pair.second.first);
+						//}
+						float step = (pair.second.first > 0) ? 0.001 / double(pair.second.first) : 0.0;
+
+						float interpQuat[8];
+						oxyde::DQ::dual_Versor(
+							angleInterp * step,
+							UxInterp, UyInterp, UzInterp,
+							sInterp * step,
+							MxInterp, MyInterp, MzInterp,
+							DUALQUAARRAY(interpQuat)
+						);
+
+						float localQuat[8];
+						oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(interpQuat),
+							DUALQUAARRAY(startQ),
+							DUALQUAARRAY(localQuat));
+
+						oxyde::log::printText(currentNode->GetName());
+						oxyde::log::printDualQuat(L"interpQuat", interpQuat);
+						oxyde::log::printDualQuat(L"localQuat", localQuat);
+
+						dualQuat localQuatDouble = { DUALQUAARRAY(localQuat) };
+						oxyde::exporter::skin::skinPoseCorrector::addLocalTransform(currentNode, localQuatDouble);
 					}
 
 					oxyde::log::printDualQuat(L"transQSanityCheck", transQSanityCheck);

@@ -7,6 +7,7 @@
 #include "iskin.h"
 #include <modstack.h>
 #include "processSkin.h"
+#include "skinDataExtraction.h"
 
 using namespace std;
 
@@ -18,6 +19,8 @@ void visitNodes(INode* rootNode, TimeValue t, FILE* expFile){
 	getObjectListElement();
 	getGeometryElement();
 	getTransformationsElement();
+
+	oxyde::exporter::skin::skinObjectsList::initializeSkinObjectsList(rootNode);
 
 	theStack.push(nodePair(getSceneElement(), rootNode));
 
@@ -31,22 +34,24 @@ void visitNodes(INode* rootNode, TimeValue t, FILE* expFile){
 
 		bool boneTest = false, skinTest = false, derivedTest = false;
 		if (!topNode->IsRootNode()){
-			boneTest = false;
-			skinTest = false;
-			derivedTest = false;
-			Object* theTopNodeObject = topNode->GetObjectRef();
-			Class_ID theTopNodeObjectClassID = theTopNodeObject->ClassID();
-			SClass_ID theTopNodeObjectSuperClassID = theTopNodeObject->SuperClassID();
-			boneTest = (BONE_OBJ_CLASSID == theTopNodeObjectClassID);
-			derivedTest = (GEN_DERIVOB_CLASS_ID == theTopNodeObjectSuperClassID );
-			if (derivedTest){
-				IDerivedObject* theDerivedObj = (IDerivedObject*)theTopNodeObject;
+			//boneTest = false;
+			//skinTest = false;
+			//derivedTest = false;
+			//Object* theTopNodeObject = topNode->GetObjectRef();
+			//Class_ID theTopNodeObjectClassID = theTopNodeObject->ClassID();
+			//SClass_ID theTopNodeObjectSuperClassID = theTopNodeObject->SuperClassID();
+			//boneTest = (BONE_OBJ_CLASSID == theTopNodeObjectClassID);
+			//derivedTest = (GEN_DERIVOB_CLASS_ID == theTopNodeObjectSuperClassID );
+			//if (derivedTest){
+			//	IDerivedObject* theDerivedObj = (IDerivedObject*)theTopNodeObject;
 
-				if (isThereASkinModifier(theDerivedObj)){
-					extractSkinDataFromObj(theDerivedObj, topNode, (_TCHAR*)topNode->GetName(), expFile);
-				}
-			}
-			bool toSee = boneTest;
+			//	if (isThereASkinModifier(theDerivedObj)){
+			//		//extractSkinDataFromObj(theDerivedObj, topNode, (_TCHAR*)topNode->GetName(), expFile);
+			//		extractSkinDataFromObj(theDerivedObj, topNode, (_TCHAR*)topNode->GetName());
+			//	}
+			//}
+			//bool toSee = boneTest;
+			oxyde::exporter::skin::skinObjectsList::addSkinObjectToList(topNode);
 		}
 		
 		fprintf(expFile, "node name: %s\n", topNode->GetName());
@@ -62,5 +67,7 @@ void visitNodes(INode* rootNode, TimeValue t, FILE* expFile){
 
 		nodeObjectID++;
 	}
+
+	oxyde::exporter::skin::skinObjectsList::buildSkinObjectsInList();
 	//closeFile("teste");
 }
