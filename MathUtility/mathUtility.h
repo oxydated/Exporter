@@ -31,6 +31,10 @@ namespace oxyde {
 		void invertMatrix(const double m[], double o[]);
 
 		void multiplyMatrices(const double m[], const double n[], double o[]);
+
+		void echelonForm(const int dim, const complex m[], const complex v[], complex om[], complex ov[]);
+
+		void solveLinearSystem(const int dim, const complex m[], const complex v[], complex om[], complex ov[]);
 	}
 
 }

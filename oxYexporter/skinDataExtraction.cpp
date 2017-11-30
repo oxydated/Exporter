@@ -26,6 +26,8 @@ namespace oxyde {
 
 			skinPoseCorrector::skinPoseCorrector(ISkin* theSkinInterface) {
 				int numBones = theSkinInterface->GetNumBones();
+				oxyde::log::printText(L"skinPoseConversion = Association[{");
+
 				for (int i = 0; i < numBones; i++) {
 					INodePtr theBoneNode = theSkinInterface->GetBone(i);
 					Matrix3 theMatrix;
@@ -43,7 +45,18 @@ namespace oxyde {
 					float qs, qx, qy, qz, dqs, dqx, dqy, dqz;
 					oxyde::math::getDualQuaternionFromMatrix(m.data(), qs, qx, qy, qz, dqs, dqx, dqy, dqz);
 					nodeToSkinPoseDict[theBoneNode] = { qs, qx, qy, qz, dqs, dqx, dqy, dqz };
+
+					float mFloat[] = { m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15] };
+					
+					oxyde::log::printText(std::to_wstring(i) + L" -> {");
+					oxyde::log::printMatrix(L"skinPoseMatrix", mFloat);
+					oxyde::log::printText(L",");
+
+					oxyde::log::printDualQuat(L"skinPose", qs, qx, qy, qz, dqs, dqx, dqy, dqz);
+					oxyde::log::printText(L"},");
 				}
+
+				oxyde::log::printText(L"}]");
 
 				INodePtr sceneRoot = skinObjectsList::getRootNodeForScene();
 

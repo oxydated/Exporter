@@ -10,50 +10,50 @@ static int indent = 1;
 using namespace std;
 
 void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* theNodeElement ){
-	setOutputFile( expFile );
+	//setOutputFile( expFile );
 	Control* theTMControl = theNode->GetTMController();
 	if(theTMControl != NULL){
-		Class_ID theTMControlClassID = theTMControl->ClassID();
-		SClass_ID theTMControlSuperClassID = theTMControl->SuperClassID();
+		//Class_ID theTMControlClassID = theTMControl->ClassID();
+		//SClass_ID theTMControlSuperClassID = theTMControl->SuperClassID();
 		IXMLDOMElement* theAnimationElement = insertAnimationForNode(theNodeElement);
 
 		// for BIPED Controller
 	
-		IBipMaster12* theBipMaster = NULL;
+		//IBipMaster12* theBipMaster = NULL;
 
-		theBipMaster = (IBipMaster12*)theTMControl->GetInterface(IBipMaster12::I_BIPMASTER12);
-		if (theBipMaster != NULL){
-			++indent;
-			DebugPrint(L"%*sit's a IBipMaster12\n", indent, " ");
-			++indent;
-			processBipedControl(theTMControl, theNode, theBipMaster, expFile, theAnimationElement);
+		//theBipMaster = (IBipMaster12*)theTMControl->GetInterface(IBipMaster12::I_BIPMASTER12);
+		//if (theBipMaster != NULL){
+		//	++indent;
+		//	DebugPrint(L"%*sit's a IBipMaster12\n", indent, " ");
+		//	++indent;
+		//	processBipedControl(theTMControl, theNode, theBipMaster, expFile, theAnimationElement);
 
-			--indent;
-			--indent;
-		}
+		//	--indent;
+		//	--indent;
+		//}
 
 		///////////////////////
-		visitController(theNode, theTMControl, expFile, theAnimationElement);
+		//visitController(theNode, theTMControl, expFile, theAnimationElement);
 
-		DebugPrint(L"%*sParent Node TM for node %s\n", indent, " ", theNode->GetName());
-		Matrix3 theMatrix = theNode->GetParentTM(0);
-		DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
-		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
-		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
-		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
+		//DebugPrint(L"%*sParent Node TM for node %s\n", indent, " ", theNode->GetName());
+		//Matrix3 theMatrix = theNode->GetParentTM(0);
+		//DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
+		//DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
+		//DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
+		//DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
 
 		/// Controller Extractor Test
 		auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(theTMControl, theNode);
 		theControllerExtractor->exportController(theAnimationElement);
 
-	} else {
+	}/* else {
 		DebugPrint(L"%*sNo Control for node %s\n", indent, " ", theNode->GetName());
 		Matrix3 theMatrix = theNode->GetNodeTM(0);
 		DebugPrint(L"%*s		row 0: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z);
 		DebugPrint(L"%*s		row 1: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z);
 		DebugPrint(L"%*s		row 2: (%10f, %10f, %10f)\n", indent, " ", theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z);
 		DebugPrint(L"%*s		row 3: (%10f, %10f, %10f)\n\n", indent, " ", theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z);
-	}
+	}*/
 }
 
 void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOMElement* theAnimationElement){

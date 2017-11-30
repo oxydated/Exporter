@@ -168,8 +168,8 @@ namespace oxyde {
 						double angleQ = 2 * oxyde::math::getAngleFromCosAndSin(transQParameters.qS, transQParameters.theSin);
 						double complementAngleQ = 2 * oxyde::math::getAngleFromCosAndSin(-transQParameters.qS, -transQParameters.theSin);
 
-						oxyde::log::printNamedParameter(L"angleQ", angleQ);
-						oxyde::log::printNamedParameter(L"complementAngleQ", complementAngleQ);
+						oxyde::log::printNamedParameter(L"angleQ", float(angleQ));
+						oxyde::log::printNamedParameter(L"complementAngleQ", float(complementAngleQ));
 
 						double lm[16];
 
@@ -224,8 +224,8 @@ namespace oxyde {
 							oxyde::DQ::getAngleForPointAroundQuatAxis(DUALQUAARRAY(transQ), px, py, pz, angleForPoint, quatAngle);
 
 							oxyde::log::printNamedParameter(L"angleForPoint", angleForPoint);
-							oxyde::log::printNamedParameter(L"interpolatedAngle", interpolatedAngle);
-							oxyde::log::printNamedParameter(L"interpolatedComplementAngle", interpolatedComplementAngle);
+							oxyde::log::printNamedParameter(L"interpolatedAngle", float(interpolatedAngle));
+							oxyde::log::printNamedParameter(L"interpolatedComplementAngle", float(interpolatedComplementAngle));
 
 							angleDeviation += std::abs(angleForPoint - interpolatedAngle);
 							complementAngleDeviation += std::abs(angleForPoint - interpolatedComplementAngle);

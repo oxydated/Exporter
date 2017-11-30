@@ -1,6 +1,7 @@
 #include <complex>
 #include "dualQuaternionFunctions.h"
 #include "matrixUtility.h"
+#include "debugLog.h"
 
 namespace oxyde {
 	namespace math {
@@ -62,13 +63,32 @@ namespace oxyde {
 			//cout << endl;
 			//cout << "eulerForm = " << eulerForm << endl;
 
-			slide = std::real(eVec1[0] * m[12] + eVec1[1] * m[13] + eVec1[2] * m[14]);
+			if(std::abs(sinTheta) > 0.0001){
 
-			//cout << "slide = " << slide << endl;
+				slide = std::real(eVec1[0] * m[12] + eVec1[1] * m[13] + eVec1[2] * m[14]);
 
-			mx = std::real((-0.5*(-2.*slide*eVec1[0] + 2.*m[12] + (-1. + cosTheta)*std::pow(eVec1[1], 2)*m[12] + (-1. + cosTheta)*std::pow(eVec1[2], 2)*m[12] + sinTheta*eVec1[2] * m[13] + eVec1[0] * eVec1[1] * (m[13] - 1.*cosTheta*m[13]) - 1.*sinTheta*eVec1[1] * m[14] + eVec1[0] * eVec1[2] * (m[14] - 1.*cosTheta*m[14]))) / sinTheta);
-			my = std::real((0.5*(2.*slide*eVec1[1] + (-1. + cosTheta)*eVec1[0] * eVec1[1] * m[12] + sinTheta*eVec1[2] * m[12] - 1.*m[13] - 1.*cosTheta*m[13] + (-1. + cosTheta)*std::pow(eVec1[1], 2)*m[13] - 1.*sinTheta*eVec1[0] * m[14] + (-1. + cosTheta)*eVec1[1] * eVec1[2] * m[14])) / sinTheta);
-			mz = std::real((0.5*(2.*slide*eVec1[2] - 1.*sinTheta*eVec1[1] * m[12] + (-1. + cosTheta)*eVec1[0] * eVec1[2] * m[12] + sinTheta*eVec1[0] * m[13] + (-1. + cosTheta)*eVec1[1] * eVec1[2] * m[13] - 1.*m[14] - 1.*cosTheta*m[14] + (-1. + cosTheta)*std::pow(eVec1[2], 2)*m[14])) / sinTheta);
+				//cout << "slide = " << slide << endl;
+
+				mx = std::real((-0.5*(-2.*slide*eVec1[0] + 2.*m[12] + (-1. + cosTheta)*std::pow(eVec1[1], 2)*m[12] + (-1. + cosTheta)*std::pow(eVec1[2], 2)*m[12] + sinTheta*eVec1[2] * m[13] + eVec1[0] * eVec1[1] * (m[13] - 1.*cosTheta*m[13]) - 1.*sinTheta*eVec1[1] * m[14] + eVec1[0] * eVec1[2] * (m[14] - 1.*cosTheta*m[14]))) / sinTheta);
+				my = std::real((0.5*(2.*slide*eVec1[1] + (-1. + cosTheta)*eVec1[0] * eVec1[1] * m[12] + sinTheta*eVec1[2] * m[12] - 1.*m[13] - 1.*cosTheta*m[13] + (-1. + cosTheta)*std::pow(eVec1[1], 2)*m[13] - 1.*sinTheta*eVec1[0] * m[14] + (-1. + cosTheta)*eVec1[1] * eVec1[2] * m[14])) / sinTheta);
+				mz = std::real((0.5*(2.*slide*eVec1[2] - 1.*sinTheta*eVec1[1] * m[12] + (-1. + cosTheta)*eVec1[0] * eVec1[2] * m[12] + sinTheta*eVec1[0] * m[13] + (-1. + cosTheta)*eVec1[1] * eVec1[2] * m[13] - 1.*m[14] - 1.*cosTheta*m[14] + (-1. + cosTheta)*std::pow(eVec1[2], 2)*m[14])) / sinTheta);
+			}
+			else {
+				mx = 0.0;	my = 0.0;	mz = 0.0;
+
+				slide = 2 * std::sqrt(std::pow(m[12], 2) / 4. + std::pow(m[13], 2) / 4. + std::pow(m[14], 2) / 4.);
+
+				if (std::abs(slide) > 0.0001) {
+					nx = m[12] / slide;
+					ny = m[13] / slide;
+					nz = m[14] / slide;
+				}
+				else {
+					nx = 1.0;
+					ny = 0.0;
+					nz = 0.0;
+				}
+			}
 		}
 
 		void getDualQuaternionParametersFromMatrix(double m[], double & angle, double & nx, double & ny, double & nz, double & slide, double & mx, double & my, double & mz)
