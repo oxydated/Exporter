@@ -10,7 +10,7 @@
 #include <memory>
 #include <CS/Biped12Api.h>
 #include <maxscript/maxwrapper/scriptcontroller.h>
-#include "xmlAnimationExporter.h"
+//#include "xmlAnimationExporter.h"
 
 namespace oxyde {
 	namespace exporter {

@@ -279,7 +279,7 @@ namespace oxyde {
 
 				oxyde::log::printLine();
 
-				IXMLDOMElement* theDualQuatTrackElement = insertDualQuatTrackForAnimation( theAnimationElement, intervals.size());
+				//IXMLDOMElement* theDualQuatTrackElement = insertDualQuatTrackForAnimation( theAnimationElement, intervals.size());
 
 				for (auto &&pair : intervals) {
 					std::wstring outStr;
@@ -425,11 +425,11 @@ namespace oxyde {
 
 					if (pair.first.first != pair.second.first) {
 
-						insertDualQuatKeyForTrack(theDualQuatTrackElement,
-							pair.first.first, pair.second.first,
-							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
-							angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
-						);
+						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
+						//	pair.first.first, pair.second.first,
+						//	startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+						//	angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
+						//);
 
 						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
 							transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
@@ -452,11 +452,11 @@ namespace oxyde {
 
 					}
 					else {
-						insertDualQuatKeyForTrack(theDualQuatTrackElement,
-							pair.first.first, pair.second.first,
-							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
-							0., 1., 0., 0., 0., 0., 0., 0.
-						);
+						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
+						//	pair.first.first, pair.second.first,
+						//	startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+						//	0., 1., 0., 0., 0., 0., 0., 0.
+						//);
 
 						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
 							1., 0., 0., 0., 0., 0., 0., 0.
@@ -529,16 +529,8 @@ namespace oxyde {
 					auto rotationControl = std::dynamic_pointer_cast<rotationControllerDataExtractor>(m_rotationController);
 					if (rotationControl) {
 						rotationControl->getValueForTime(t, q);
-						//rotationControl->getValueForTime(t, eulerX, eulerY, eulerZ);
-						//int EulerOrder = rotationControl->getEulerAngleOrder();
-						//outStream << "EulerOrder = " << EulerOrder << std::endl;
-
-						//float eulerRotation[3] = { eulerX, eulerY, eulerZ };
-						//EulerToQuat(eulerRotation, q, EulerOrder);
 					}
 				}
-
-				//outStream << "rotControl = {" << eulerX << ", " << eulerY << ", " << eulerZ << "}" << std::endl;
 
 				float rotQuat[8];
 				oxyde::DQ::pure_Real_quaternion(q.w, q.x, q.y, q.z, DUALQUAARRAY(rotQuat));
@@ -566,7 +558,6 @@ namespace oxyde {
 				outStream << "}.dualQuatUnit";
 				outStream << std::endl;
 
-				//oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(transQuat), DUALQUAARRAY(rotQuat), DUALQUAARRAY(quat));
 				oxyde::DQ::dual_quaternion_product( DUALQUAARRAY(transQuat), DUALQUAARRAY(rotQuat),DUALQUAARRAY(quat));
 				outStream << "finalQuat = {";
 				outStream << quat[0] << "," << quat[1] << "," << quat[2] << "," << quat[3] << ",";
@@ -695,7 +686,6 @@ namespace oxyde {
 				std::shared_ptr<keyControllerDataExtractor>XKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_XController);
 				if (XKeyController_ptr)
 				{
-					//m_XController->exportController();
 					std::set<TimeValue> tempSet = XKeyController_ptr->getKeyTimes();
 					for (auto&& t : tempSet) {
 						keyTimes.insert(t);
@@ -706,7 +696,6 @@ namespace oxyde {
 				std::shared_ptr<keyControllerDataExtractor>YKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_YController);
 				if (YKeyController_ptr)
 				{
-					//m_XController->exportController();
 					std::set<TimeValue> tempSet = YKeyController_ptr->getKeyTimes();
 					for (auto&& t : tempSet) {
 						keyTimes.insert(t);
@@ -717,7 +706,6 @@ namespace oxyde {
 				std::shared_ptr<keyControllerDataExtractor>ZKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_ZController);
 				if (ZKeyController_ptr)
 				{
-					//m_XController->exportController();
 					std::set<TimeValue> tempSet = ZKeyController_ptr->getKeyTimes();
 					for (auto&& t : tempSet) {
 						keyTimes.insert(t);
@@ -741,21 +729,6 @@ namespace oxyde {
 			{
 				m_Control->GetValue(theTime, (void*)(&q), FOREVER, CTRL_ABSOLUTE);
 			}
-
-			//Class_ID XYZControllerDataExtractor::getClass_ID() 
-			//{
-			//}
-
-			//void XYZControllerDataExtractor::registerMe() {
-			//	
-			//}
-
-			//controllerDataExtractor_ptr XYZControllerDataExtractor::buildXYZControllerDataExtractor(Control* theControl) 
-			//{
-			//	return std::dynamic_pointer_cast<controllerDataExtractor>(
-			//		std::make_shared<XYZControllerDataExtractor>(XYZControllerDataExtractor(theControl))
-			//		);
-			//}
 
 			XYZControllerDataExtractor::XYZControllerDataExtractor(Control *theControl) : controllerDataExtractor(theControl)
 			{
@@ -855,7 +828,6 @@ namespace oxyde {
 				Matrix3 localMatrix;
 				Matrix3 ParentMatrix;
 				for (auto&& t : keyTimes) {
-					//std::array<double, 16> &&mArray = getLocalMatrixForTime(t);
 					theMatrix.IdentityMatrix();
 					localMatrix.IdentityMatrix();
 

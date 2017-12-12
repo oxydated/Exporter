@@ -1,6 +1,6 @@
 #include "processSkin.h"
 #include "processGeometry.h"
-#include "xmlSkinExporter.h"
+//#include "xmlSkinExporter.h"
 #include "matrixUtility.h"
 #include "debugLog.h"
 #include "dualQuaternionMath.h"
@@ -20,7 +20,6 @@ bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	return thereIsASkinModifier;
 }
 
-//bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName, FILE* expFile){
 bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName) {
 
 	using dualQuat = std::array<double, 8>;
@@ -50,7 +49,6 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	///////////////// extracting the mesh data for the skin object
 
-	//int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack, expFile);
 	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack);
 
 	int thisSkin = skinID++;
@@ -58,14 +56,14 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	ISkinContextData* theSkinContextData = theSkinInterface->GetContextInterface(theNode);
 	int numVertices = theSkinContextData->GetNumPoints();
 
-	IXMLDOMElement* skinNode = insertSkinByID(thisSkin, skinNodeName, meshID, numBones, numVertices);
+	//IXMLDOMElement* skinNode = insertSkinByID(thisSkin, skinNodeName, meshID, numBones, numVertices);
 
 	Matrix3 theMatrix;
 	theSkinInterface->GetSkinInitTM(theNode, theMatrix);
 
 	Matrix3 theObjectTM = theNode->GetObjectTM(0);
 
-	insertObjectTMforSkin(skinNode, theObjectTM);
+	//insertObjectTMforSkin(skinNode, theObjectTM);
 
 	oxyde::exporter::skin::skinPoseCorrector theSkinPoseCorrector(theSkinInterface);
 
@@ -74,32 +72,16 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 		theSkinInterface->GetBoneInitTM(theBoneNode, theMatrix);
 
-		IXMLDOMElement* theNewBoneElement = insertBoneForSkin(skinNode, (_TCHAR*)theBoneNode->GetName(), i);
-		if (theNewBoneElement != NULL){
-			insertObjectTMforBone(theNewBoneElement, theMatrix);
+		//IXMLDOMElement* theNewBoneElement = insertBoneForSkin(skinNode, (_TCHAR*)theBoneNode->GetName(), i);
+		/*if (theNewBoneElement != NULL)*/{
+			//insertObjectTMforBone(theNewBoneElement, theMatrix);
 			
-			//double m[16];
-			//m[0] = theMatrix.GetRow(0).x;		m[1] = theMatrix.GetRow(0).y;		m[2] = theMatrix.GetRow(0).z;		m[3] = 0.;
-			//m[4] = theMatrix.GetRow(1).x;		m[5] = theMatrix.GetRow(1).y;		m[6] = theMatrix.GetRow(1).z;		m[7] = 0.;
-			//m[8] = theMatrix.GetRow(2).x;		m[9] = theMatrix.GetRow(2).y;		m[10] = theMatrix.GetRow(2).z;		m[11] = 0.;
-			//m[12] = theMatrix.GetRow(3).x;		m[13] = theMatrix.GetRow(3).y;		m[14] = theMatrix.GetRow(3).z;		m[15] = 1.;
-			//float qs, qx, qy, qz, dqs, dqx, dqy, dqz;
-			//oxyde::math::getDualQuaternionFromMatrix(m, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
-
-			//float qCs, qCx, qCy, qCz, dqCs, dqCx, dqCy, dqCz;
-
 			dualQuat q = theSkinPoseCorrector.getSkinPosedualQuatForNode(theBoneNode);
 
 			oxyde::log::printLine();
-			//oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUACOMP(q));
+
 			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUAARRAY(q));
-			
-			//oxyde::DQ::dual_quaternion_complement(DUALQUACOMP(q), DUALQUACOMP(qC));
-
-			//oxyde::log::printDualQuat(L"DualQuatforBoneqC", DUALQUACOMP(qC));
-
-			//insertDualQuatForBone(theNewBoneElement, qs, qx, qy, qz, dqs, dqx, dqy, dqz);
-			insertDualQuatForBone(theNewBoneElement, DUALQUAARRAY(q));
+			//insertDualQuatForBone(theNewBoneElement, DUALQUAARRAY(q));
 
 		}
 	}
@@ -108,20 +90,19 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	for (int i = 0; i < numVertices; i++){
 		int numBonesForVertex = theSkinContextData->GetNumAssignedBones(i);
-		IXMLDOMElement* theVertexNode = insertVertexForSkin(skinNode, i, numBonesForVertex);
+		//IXMLDOMElement* theVertexNode = insertVertexForSkin(skinNode, i, numBonesForVertex);
 
 		//////////////////////////////////////    bone weights per skin vertex loop
 
 		for (int j = 0; j < numBonesForVertex; j++){
 			int boneIndexInSkin = theSkinContextData->GetAssignedBone(i, j);
 			float boneWeightForVertex = theSkinContextData->GetBoneWeight(i, j);
-			insertBoneEntryForVertex(theVertexNode, j, boneIndexInSkin, boneWeightForVertex);
+			//insertBoneEntryForVertex(theVertexNode, j, boneIndexInSkin, boneWeightForVertex);
 		}
 	}
 	return true;
 }
 
-//int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, FILE* expFile){
 int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack) {
 	ObjectState theState;
 	int nextModifier = skinIndexInModifierStack + 1;
@@ -134,10 +115,6 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 
 	Matrix3* theMatrix_p = NULL;
 	theMatrix_p = theState.GetTM();
-	//DebugPrint(L"	ObjectStateTM row 0: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(0).x, theMatrix_p->GetRow(0).y, theMatrix_p->GetRow(0).z);
-	//DebugPrint(L"	ObjectStateTM row 1: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(1).x, theMatrix_p->GetRow(1).y, theMatrix_p->GetRow(1).z);
-	//DebugPrint(L"	ObjectStateTM row 2: (%10f, %10f, %10f)\n", theMatrix_p->GetRow(2).x, theMatrix_p->GetRow(2).y, theMatrix_p->GetRow(2).z);
-	//DebugPrint(L"	ObjectStateTM row 3: (%10f, %10f, %10f)\n\n", theMatrix_p->GetRow(3).x, theMatrix_p->GetRow(3).y, theMatrix_p->GetRow(3).z);
 
 	int meshID = -1;
 
@@ -147,7 +124,6 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 
 		////////////////////	actual mesh extraction process
 
-		//meshID = processMesh(theMesh, expFile);
 		meshID = processMesh(theMesh);
 	}
 	return meshID;

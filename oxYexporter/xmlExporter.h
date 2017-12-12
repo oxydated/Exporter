@@ -7,10 +7,13 @@
 #include <stdio.h>
 #include <ObjBase.h>
 #include <msxml6.h>
+//#import<msxml6.dll>
 #include <comutil.h>
 #include <tchar.h>
 #include <string>
 #include <sstream>
+
+//MSXML2::IXMLDOMDocument3Ptr
 
 IXMLDOMDocument3* getTheDocument();
 //<document>

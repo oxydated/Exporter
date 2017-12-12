@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "oxyExp.h"
 #include "nodeNavigation.h"
-#include "xmlExporter.h"
+//#include "xmlExporter.h"
+#include "xmlDocument.h"
 
 #define SETMCHARSTRING(ids)		static MCHAR lpBuffer[256];	\
 								LoadString( hModule, ##ids##, (LPTSTR)lpBuffer, 256);	\
@@ -71,8 +72,12 @@ int oxyExp::DoExport( const MCHAR *name, ExpInterface *ei, Interface *i, BOOL su
 	if(expFile != NULL){
 		DebugPrint(L"It worked so far...\n");
 		INode* rootNode = i->GetRootNode();
-		visitNodes(rootNode, i->GetTime(), expFile );
-		closeFile(name);
+		oxyde::exporter::XML::oxyDocument::createDocument();
+		oxyde::exporter::XML::oxyDocumentPtr theDocument = oxyde::exporter::XML::oxyDocument::getTheInstance();
+		visitNodes(rootNode, i->GetTime(), theDocument);
+		theDocument->save(std::wstring(name));
+		//closeFile(name);
+		oxyde::exporter::XML::oxyDocument::releaseDocument();
 
 		fclose(expFile);
 
