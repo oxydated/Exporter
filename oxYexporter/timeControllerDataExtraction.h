@@ -7,7 +7,7 @@ namespace oxyde {
 
 			class defaultControllerDataExtractor : public controllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildDefaultControllerDataExtractor(Control* theControl);
@@ -19,7 +19,7 @@ namespace oxyde {
 			class floatControllerDataExtractor : public keyControllerDataExtractor {
 			public:
 				float getValueForTime(TimeValue theTime);
-				void exportController(IXMLDOMElement* theAnimationElement);
+				void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 
 				static Class_ID getClass_ID();
 				static void registerMe();
@@ -34,7 +34,7 @@ namespace oxyde {
 
 			class matrixControllerDataExtractor : public keyControllerDataExtractor {
 			public:
-				void buildTrack(IXMLDOMElement* theAnimationElement);
+				void buildTrack(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement);
 			protected:
 				virtual void getDualQuatForTime(TimeValue t, float quat[]) = 0;
 				virtual void getLocalMatrixForTime(TimeValue t, double m[]) = 0;
@@ -43,7 +43,7 @@ namespace oxyde {
 
 			class PRScontrollerDataExtractor : public matrixControllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				std::set<TimeValue> getKeyTimes();
 
 				static Class_ID getClass_ID();
@@ -75,7 +75,7 @@ namespace oxyde {
 
 			class positionControllerDataExtractor : public XYZControllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildPositionControllerDataExtractor(Control* theControl);
@@ -86,7 +86,7 @@ namespace oxyde {
 
 			class rotationControllerDataExtractor : public XYZControllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				int getEulerAngleOrder();
 				static Class_ID getClass_ID();
 				static void registerMe();
@@ -98,7 +98,7 @@ namespace oxyde {
 
 			class bipSlaveControllerDataExtractor : public matrixControllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildBipSlaveControllerDataExtractor(Control* theControl);
@@ -113,7 +113,7 @@ namespace oxyde {
 
 			class bipBodyControllerDataExtractor : public controllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildBipBodyControllerDataExtractor(Control* theControl);

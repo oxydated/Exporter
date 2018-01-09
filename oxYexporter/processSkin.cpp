@@ -20,7 +20,8 @@ bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	return thereIsASkinModifier;
 }
 
-bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName) {
+bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHAR* skinNodeName,
+	oxyde::exporter::XML::oxyObjectListPtr theObjectList, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
 
 	using dualQuat = std::array<double, 8>;
 	using matrix4x4 = std::array<double, 16>;
@@ -49,12 +50,19 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	///////////////// extracting the mesh data for the skin object
 
-	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack);
+	//** create mesh node in geometry section here
+
+	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack, theGeometrySection);
 
 	int thisSkin = skinID++;
 
 	ISkinContextData* theSkinContextData = theSkinInterface->GetContextInterface(theNode);
 	int numVertices = theSkinContextData->GetNumPoints();
+
+	//** create skin node here
+
+	//theSkinElement->buildSkinElement();
+	//oxyde::exporter::XML::oxySkinElementPtr dumbTest = theSkinElement->getPtr();
 
 	//IXMLDOMElement* skinNode = insertSkinByID(thisSkin, skinNodeName, meshID, numBones, numVertices);
 
@@ -63,24 +71,40 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	Matrix3 theObjectTM = theNode->GetObjectTM(0);
 
-	//insertObjectTMforSkin(skinNode, theObjectTM);
+	//insertObjectTMforSkin(skinNode, theObjectTM);	
+
+	oxyde::exporter::XML::oxySkinElementPtr theSkinElement = oxyde::exporter::XML::oxySkinElement::createSkinElement(theObjectList, skinNodeName, meshID,
+		numBones,
+		numVertices,
+		theObjectTM.GetRow(0).x, theObjectTM.GetRow(0).y, theObjectTM.GetRow(0).z,
+		theObjectTM.GetRow(1).x, theObjectTM.GetRow(1).y, theObjectTM.GetRow(1).z,
+		theObjectTM.GetRow(2).x, theObjectTM.GetRow(2).y, theObjectTM.GetRow(2).z,
+		theObjectTM.GetRow(3).x, theObjectTM.GetRow(3).y, theObjectTM.GetRow(3).z);
 
 	oxyde::exporter::skin::skinPoseCorrector theSkinPoseCorrector(theSkinInterface);
 
-	for (int i = 0; i < numBones; i++){
+	for (int i = 0; i < numBones; i++) {
 		INode* theBoneNode = theSkinInterface->GetBone(i);
 
 		theSkinInterface->GetBoneInitTM(theBoneNode, theMatrix);
 
 		//IXMLDOMElement* theNewBoneElement = insertBoneForSkin(skinNode, (_TCHAR*)theBoneNode->GetName(), i);
-		/*if (theNewBoneElement != NULL)*/{
+		/*if (theNewBoneElement != NULL)*/ {
 			//insertObjectTMforBone(theNewBoneElement, theMatrix);
-			
+
 			dualQuat q = theSkinPoseCorrector.getSkinPosedualQuatForNode(theBoneNode);
 
 			oxyde::log::printLine();
 
 			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUAARRAY(q));
+
+			theSkinElement->addBone((_TCHAR*)theBoneNode->GetName(), i,
+				theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z,
+				theMatrix.GetRow(1).x, theMatrix.GetRow(1).y, theMatrix.GetRow(1).z,
+				theMatrix.GetRow(2).x, theMatrix.GetRow(2).y, theMatrix.GetRow(2).z,
+				theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z,
+				DUALQUAARRAY(q)
+			);
 			//insertDualQuatForBone(theNewBoneElement, DUALQUAARRAY(q));
 
 		}
@@ -90,6 +114,9 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	for (int i = 0; i < numVertices; i++){
 		int numBonesForVertex = theSkinContextData->GetNumAssignedBones(i);
+
+		//auto theSkinVertex =  theSkinElement->addVertex(i);
+		oxyde::exporter::XML::oxySkinElement::oxySkinVertexPtr theSkinVertex  = theSkinElement->addVertex(i, numBonesForVertex);
 		//IXMLDOMElement* theVertexNode = insertVertexForSkin(skinNode, i, numBonesForVertex);
 
 		//////////////////////////////////////    bone weights per skin vertex loop
@@ -97,13 +124,14 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 		for (int j = 0; j < numBonesForVertex; j++){
 			int boneIndexInSkin = theSkinContextData->GetAssignedBone(i, j);
 			float boneWeightForVertex = theSkinContextData->GetBoneWeight(i, j);
+			theSkinVertex->addBoneEntry(j, boneIndexInSkin, boneWeightForVertex);
 			//insertBoneEntryForVertex(theVertexNode, j, boneIndexInSkin, boneWeightForVertex);
 		}
 	}
 	return true;
 }
 
-int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack) {
+int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
 	ObjectState theState;
 	int nextModifier = skinIndexInModifierStack + 1;
 	if (nextModifier == (theDerivedObj->NumModifiers())){
@@ -123,8 +151,8 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 	if (isGeometry){
 
 		////////////////////	actual mesh extraction process
-
-		meshID = processMesh(theMesh);
+		//** pass mesh node to this function
+		meshID = processMesh(theMesh, theGeometrySection);
 	}
 	return meshID;
 }

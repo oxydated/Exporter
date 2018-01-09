@@ -68,6 +68,8 @@ namespace oxyde {
 				std::wstring nodeName;
 				int nodeObject;
 			};
+
+			using oxyNodeElementPtr = std::shared_ptr<oxyNodeElement>;
 		}
 	}
 }

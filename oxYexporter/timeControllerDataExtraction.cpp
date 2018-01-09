@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <memory>
 #include "matrixUtility.h"
 #include "linAlg.h"
 #include "dualQuaternionFunctions.h"
@@ -21,7 +22,7 @@ namespace oxyde {
 				return Class_ID();
 			}
 
-			void defaultControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement) {
+			void defaultControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
 				DebugPrint(L"This is a default extractor test... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 			}
 
@@ -39,7 +40,7 @@ namespace oxyde {
 				return 0.0;
 			}
 
-			void floatControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement) {
+			void floatControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
 				DebugPrint(L"This is a float extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 				return;
 			}
@@ -61,7 +62,7 @@ namespace oxyde {
 				return GetKeyControlInterface(m_Control);
 			}
 
-			void matrixControllerDataExtractor::buildTrack(IXMLDOMElement* theAnimationElement)
+			void matrixControllerDataExtractor::buildTrack(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
 			{
 				using dualQuat = std::array<double, 8>;
 				using dualQuatKey = std::pair<TimeValue, dualQuat>;
@@ -279,6 +280,8 @@ namespace oxyde {
 
 				oxyde::log::printLine();
 
+				oxyde::exporter::XML::oxyKeyframeElementPtr theKeyframeElement = std::make_shared<oxyde::exporter::XML::oxyKeyframeElement>(theAnimationElement);
+				oxyde::exporter::XML::oxyDualQuatTrackElementPtr theDualQuatTrackElement = std::make_shared<oxyde::exporter::XML::oxyDualQuatTrackElement>(theKeyframeElement, intervals.size());
 				//IXMLDOMElement* theDualQuatTrackElement = insertDualQuatTrackForAnimation( theAnimationElement, intervals.size());
 
 				for (auto &&pair : intervals) {
@@ -431,6 +434,14 @@ namespace oxyde {
 						//	angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
 						//);
 
+						//oxyde::exporter::XML::oxyDualQuatTrackElementPtr theDualQuatTrackElement
+
+						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+							pair.first.first, pair.second.first,
+							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+							angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
+						);
+
 						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
 							transQParameters.Ux, transQParameters.Uy, transQParameters.Uz,
 							angleQ, transQParameters.theSfactor,
@@ -452,11 +463,11 @@ namespace oxyde {
 
 					}
 					else {
-						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
-						//	pair.first.first, pair.second.first,
-						//	startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
-						//	0., 1., 0., 0., 0., 0., 0., 0.
-						//);
+						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+							pair.first.first, pair.second.first,
+							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
+							0., 1., 0., 0., 0., 0., 0., 0.
+						);
 
 						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
 							1., 0., 0., 0., 0., 0., 0., 0.
@@ -569,7 +580,7 @@ namespace oxyde {
 				DebugOutputString(resultString.c_str());
 			}
 
-			void PRScontrollerDataExtractor::exportController(IXMLDOMElement* theAnimationElement)
+			void PRScontrollerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
 			{
 				DebugPrint(L"This is a PRS Controller Extractor test\n");
 				std::set<TimeValue> keyTimes = getKeyTimes();
@@ -743,7 +754,7 @@ namespace oxyde {
 				}
 			}
 
-			void positionControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement)
+			void positionControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
 			{
 				DebugPrint(L"This is a position Controller Extractor\n");
 				std::set<TimeValue> keyTimes = getKeyTimes();
@@ -770,7 +781,7 @@ namespace oxyde {
 
 			positionControllerDataExtractor::positionControllerDataExtractor(Control *theControl) : XYZControllerDataExtractor(theControl){}
 
-			void rotationControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement)
+			void rotationControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
 			{
 				DebugPrint(L"This is a ROTATION Controller Extractor\n");
 				std::set<TimeValue> keyTimes = getKeyTimes();
@@ -821,7 +832,7 @@ namespace oxyde {
 				m[12] = localMatrix.GetRow(3).x;	m[13] = localMatrix.GetRow(3).y;	m[14] = localMatrix.GetRow(3).z;	m[15] = 1.;
 			}
 
-			void bipSlaveControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement) {
+			void bipSlaveControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
 				DebugPrint(L"This is a bipSlave extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 				std::set<TimeValue> keyTimes = getKeyTimes();
 				Matrix3 theMatrix;
@@ -925,7 +936,7 @@ namespace oxyde {
 				return GetKeyControlInterface(m_Control);
 			}
 
-			void bipBodyControllerDataExtractor::exportController(IXMLDOMElement* theAnimationElement) {
+			void bipBodyControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
 				DebugPrint(L"This is a bipBody extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 
 				if (!m_Control->IsLeaf()) {

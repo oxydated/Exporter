@@ -11,6 +11,7 @@
 #include <CS/Biped12Api.h>
 #include <maxscript/maxwrapper/scriptcontroller.h>
 //#include "xmlAnimationExporter.h"
+#include "xmlDocumentAnimation.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -23,7 +24,8 @@ namespace oxyde {
 
 			class controllerDataExtractor {
 			public:
-				virtual void exportController(IXMLDOMElement* theAnimationElement) = 0;
+				//virtual void exportController(IXMLDOMElement* theAnimationElement) = 0;
+				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) = 0;
 
 				static controllerDataExtractor_ptr buildExtractor(Control* theControl);
 				static controllerDataExtractor_ptr buildExtractorAndSetCurrentNode(Control* theControl, INode* theNode);

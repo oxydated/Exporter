@@ -88,9 +88,9 @@ Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry) {
 	return extractMeshFromObjectState(theNode->EvalWorldState(t), t, isGeometry );
 }
 
-int processMesh(Mesh &theMesh) {
+int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
 
-	static int meshID = 0;
+	//static int meshID = 0;
 	//IXMLDOMElement *theMeshElement = NULL;
 	
 	int mp = 1;
@@ -104,16 +104,23 @@ int processMesh(Mesh &theMesh) {
 	
 	vertexBuilder::startBuilder( &theMesh, mp );
 
-	int thisMesh = meshID++;
+	oxyde::exporter::XML::oxyMeshSectionPtr theMeshElement = std::make_shared<oxyde::exporter::XML::oxyMeshSection>(theGeometrySection);
+
+	int thisMesh = theMeshElement->getMeshID();
 	//theMeshElement = insertMeshByID(thisMesh, finalFace::getNumFinalFaces(), finalVertex::getNumFinals());
+
+	oxyde::exporter::XML::oxyMeshSection::oxyMeshFacesPtr faces = theMeshElement->setMeshFaces(finalFace::getNumFinalFaces());
 
 	for( int theFace = 0; theFace < finalFace::getNumFinalFaces(); theFace++ ){
 		int v0 = finalFace::getFace(theFace).getVertexForCorner(0);
 		int v1 = finalFace::getFace(theFace).getVertexForCorner(1);
 		int v2 = finalFace::getFace(theFace).getVertexForCorner(2);
 
+		faces->addFace(theFace, v0, v1, v2);
 		//insertFaceForMesh( theMeshElement, theFace, v0, v1, v2 );
 	}
+
+	oxyde::exporter::XML::oxyMeshSection::oxyMeshVerticesPtr vertices = theMeshElement->setMeshVertices(finalVertex::getNumFinals());
 
 	for( int theFinal = 0; theFinal < finalVertex::getNumFinals(); theFinal++ ){
 		int theVert = finalVertex::getVertex(theFinal).getVert();
@@ -123,6 +130,9 @@ int processMesh(Mesh &theMesh) {
 		Point3 vertPos = vertexBuilder::getVertexPosForFinal(theFinal);
 		UVVert texCoord = vertexBuilder::getTexCoordForFinal(theFinal);
 		Point3 NormalVec = vertexBuilder::getNormalForFinal(theFinal);
+		vertices->addVertex(theFinal, theVert, vertPos.x, vertPos.y, vertPos.z,
+			theTVert, texCoord.x, texCoord.y,
+			theNormal, NormalVec.x, NormalVec.y, NormalVec.z);
 
 		//insertVertexForMesh( theMeshElement, theFinal,	theVert,	vertPos.x, vertPos.y, vertPos.z, 
 		//												theTVert,	texCoord.x, texCoord.y, 

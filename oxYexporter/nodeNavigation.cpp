@@ -34,7 +34,7 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 		//IXMLDOMElement* newParent = insertNode(thePair.first, (_TCHAR*)topNode->GetName(), nodeObjectID);
 		//oxyNodeElement(oxyDocumentElementPtr theParent, std::wstring inputNodeName, int inputNodeObject)
 
-		oxyde::exporter::XML::oxyNodeKeeperPtr newParent = std::make_shared<oxyde::exporter::XML::oxyNodeElement>(thePair.first, topNode->GetName());
+		oxyde::exporter::XML::oxyNodeElementPtr newParent = std::make_shared<oxyde::exporter::XML::oxyNodeElement>(thePair.first, topNode->GetName());
 		theStack.pop();
 
 		DebugPrint(L"Name of the topNode: %s\n",  topNode->GetName());
@@ -45,7 +45,7 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 			oxyde::exporter::skin::skinObjectsList::addSkinObjectToList(topNode);
 		}
 
-		//getControllerInformation(topNode, expFile, newParent);
+		getControllerInformation(topNode, newParent);
 
 		int numChildren = topNode->NumberOfChildren();
 		for (int i = 0; i < numChildren; i++) {
@@ -56,5 +56,5 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 		nodeObjectID++;
 	}
 
-	oxyde::exporter::skin::skinObjectsList::buildSkinObjectsInList();
+	oxyde::exporter::skin::skinObjectsList::buildSkinObjectsInList(theDocument);
 }

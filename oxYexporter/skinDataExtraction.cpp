@@ -4,7 +4,7 @@
 #include "processMaterials.h"
 #include "processTransforms.h"
 #include "processControllers.h"
-#include "xmlExporter.h"
+//#include "xmlExporter.h"
 #include "iskin.h"
 #include <modstack.h>
 #include <stack>
@@ -13,6 +13,8 @@
 #include "debugLog.h"
 #include "dualQuaternionMath.h"
 #include "dualQuaternionFunctions.h"
+#include "xmlDocumentSkin.h"
+#include "xmlDocumentMesh.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -139,7 +141,12 @@ namespace oxyde {
 
 			skinObjectsList*  skinObjectsList::theSingleton = NULL;
 
-			void skinObjectsList::buildSkinObjects() {
+			void skinObjectsList::buildSkinObjects(oxyde::exporter::XML::oxyDocumentPtr theDocument) {
+
+				//** create skin section and geometry section here
+				oxyde::exporter::XML::oxyObjectListPtr theObjectList = std::make_shared<oxyde::exporter::XML::oxyObjectList>(theDocument);
+				oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection = std::make_shared<oxyde::exporter::XML::oxyGeometryElement>(theDocument);
+
 
 				for (auto &&skinNode : nodeToSkinVector) {
 					if (!skinNode->IsRootNode()) {
@@ -153,7 +160,9 @@ namespace oxyde {
 
 							if (isThereASkinModifier(theDerivedObj)) {
 								//extractSkinDataFromObj(theDerivedObj, skinNode, (_TCHAR*)skinNode->GetName(), expFile);
-								extractSkinDataFromObj(theDerivedObj, skinNode, (_TCHAR*)skinNode->GetName());
+
+								//** passdown skin and geometry sections to this function
+								extractSkinDataFromObj(theDerivedObj, skinNode, (_TCHAR*)skinNode->GetName(), theObjectList, theGeometrySection);
 							}
 						}
 					}

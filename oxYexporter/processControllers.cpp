@@ -3,21 +3,24 @@
 #include "ikctrl.h"
 #include "controllerDataExtractor.h"
 #include <maxscript/foundation/numbers.h>
+#include "xmlDocumentAnimation.h"
 
 static _TCHAR theString[100] = TEXT("");
 static int indent = 1;
 
 using namespace std;
 
-void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* theNodeElement ){
+void getControllerInformation(INode* theNode, oxyde::exporter::XML::oxyNodeElementPtr theNodeElement) {
 	Control* theTMControl = theNode->GetTMController();
 	if(theTMControl != NULL){
+
+		oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement = std::make_shared<oxyde::exporter::XML::oxyAnimationElement>(theNodeElement);
 
 		//IXMLDOMElement* theAnimationElement = insertAnimationForNode(theNodeElement);
 
 		/// Controller Extractor Test
 		auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(theTMControl, theNode);
-		//theControllerExtractor->exportController(theAnimationElement);
+		theControllerExtractor->exportController(theAnimationElement);
 
 	}
 }

@@ -7,6 +7,7 @@
 #include <vector>
 #include <array>
 #include "max.h"
+#include "xmlDocument.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -74,10 +75,10 @@ namespace oxyde {
 					nodeToSkinVector.push_back(skinNode);
 				}
 
-				void buildSkinObjects();
+				void buildSkinObjects( oxyde::exporter::XML::oxyDocumentPtr theDocument);
 
-				static void buildSkinObjectsInList() {
-					theSingleton->buildSkinObjects();
+				static void buildSkinObjectsInList( oxyde::exporter::XML::oxyDocumentPtr theDocument) {
+					theSingleton->buildSkinObjects(theDocument);
 				}
 			};
 		}

@@ -53,18 +53,9 @@ namespace oxyde {
 					xslDoc->preserveWhiteSpace = VARIANT_FALSE;
 
 					LPTSTR theStyle = new _TCHAR[800];
-					LoadString(getThisDLLModule(), IDS_STYLE_INDENT, theStyle, 800);
-
-					//BSTR theInputStyle = _bstr_t(theStyle);
-
-					//VARIANT loaded = _variant_t(false).Detach();
-
-					//hr = xslDoc->loadXML(theInputStyle, &loaded.boolVal);
-					//bool itWorked = (loaded.boolVal == VARIANT_TRUE);
-					//VariantClear(&loaded);
+					LoadString(getThisDLLModule(), IDS_STYLE_ORDER, theStyle, 800);
 
 					VARIANT_BOOL isLoaded = xslDoc->loadXML(_bstr_t(theStyle));
-
 
 					MSXML2::IXMLDOMDocument3Ptr outDoc = nullptr;
 
@@ -77,7 +68,24 @@ namespace oxyde {
 
 						hr = xmlDocumentPointer->transformNodeToObject(xslDoc, outDoc.GetInterfacePtr());
 						if (hr == S_OK) {
-							outDoc->save(_variant_t(name.data()));
+							LoadString(getThisDLLModule(), IDS_STYLE_INDENT, theStyle, 800);
+
+							VARIANT_BOOL isLoaded = xslDoc->loadXML(_bstr_t(theStyle));
+
+							MSXML2::IXMLDOMDocument3Ptr finalDoc = nullptr;
+
+							hr = finalDoc.CreateInstance(__uuidof(MSXML2::DOMDocument60), NULL, CLSCTX_INPROC_SERVER);
+							if (hr == S_OK) {
+								finalDoc->async = VARIANT_FALSE;
+								finalDoc->validateOnParse = VARIANT_FALSE;
+								finalDoc->resolveExternals = VARIANT_FALSE;
+								finalDoc->preserveWhiteSpace = VARIANT_FALSE; 
+								
+								hr = outDoc->transformNodeToObject(xslDoc, finalDoc.GetInterfacePtr());
+								if (hr == S_OK) {
+									finalDoc->save(_variant_t(name.data()));
+								}
+							}
 						}
 					}
 

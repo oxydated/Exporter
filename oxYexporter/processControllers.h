@@ -7,6 +7,7 @@
 #include <set>
 #include <CS/Biped12Api.h>
 #include <maxscript/maxwrapper/scriptcontroller.h>
+#include "xmlDocumentScene.h"
 
 //#include "xmlAnimationExporter.h"
 
@@ -18,7 +19,7 @@ typedef keySet::iterator keyIterator;
 #define POSITION_XYZ_CLASSID Class_ID(0x118F7E02, 0xFFEE238A)
 
 
-void getControllerInformation(INode* theNode, FILE* expFile, IXMLDOMElement* theNodeElement);
+void getControllerInformation(INode* theNode, oxyde::exporter::XML::oxyNodeElementPtr theNodeElement);
 
 //void visitController(INode* theNode, Control* theControl, FILE* expFile, IXMLDOMElement* theAnimationElement);
 

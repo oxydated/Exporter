@@ -6,6 +6,7 @@
 #include <mesh.h>
 #include <MeshNormalSpec.h>
 #include <object.h>
+#include "xmlDocumentMesh.h"
 
 /*
 	notes about geometry in 3dsmax:
@@ -219,7 +220,7 @@ Mesh& extractMeshFromObjectState(ObjectState theState, TimeValue t, bool &isGeom
 Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry);
 
 //int processMesh( Mesh &theMesh, FILE* expFile = stdout );
-int processMesh(Mesh &theMesh);
+int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection);
 
 void getNormalsPerMeshFace( Mesh &theMesh, int theFace );
 
