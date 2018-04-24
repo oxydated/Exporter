@@ -38,6 +38,11 @@ namespace oxyde {
 				return std::make_shared<oxyMeshVertices>(theMeshElement, inputnumVertices);
 			}
 
+			oxyMeshSection::oxyMeshTexturePtr oxyMeshSection::setMeshTexture(std::wstring inputMap)
+			{
+				return std::make_shared<oxyMeshTexture>(theMeshElement, inputMap);
+			}
+
 			oxyMeshSection::oxyMeshFaces::oxyMeshFacesElement::oxyMeshFacesElement(oxyMeshElementPtr theMeshElement, int inputnumFaces) :
 				oxyDocumentElement(theMeshElement, L"faces"),
 				numFaces(inputnumFaces)
@@ -122,6 +127,22 @@ namespace oxyde {
 			void oxyMeshSection::oxyMeshVertices::addVertex(int inputvertexID, int inputtheVert, float inputx, float inputy, float inputz, int inputtheTVert, float inputu, float inputv, int inputtheNormal, float inputnx, float inputny, float inputnz)
 			{
 				oxyMeshVertexDataElementPtr theVertexElement = std::make_shared<oxyMeshVertexDataElement>(theVerticesElement, inputvertexID, inputtheVert, inputx, inputy, inputz, inputtheTVert, inputu, inputv, inputtheNormal, inputnx, inputny, inputnz);
+			}
+			oxyMeshSection::oxyMeshTexture::oxyMeshTextureElement::oxyMeshTextureElement(oxyMeshElementPtr theMeshElement, std::wstring inputMap) :
+				oxyDocumentElement(theMeshElement, L"textureMap"),
+				theMap(inputMap)
+			{
+				buildListOfAttributes();
+				setElementAttributes();
+			}
+
+			void oxyMeshSection::oxyMeshTexture::oxyMeshTextureElement::buildListOfAttributes()
+			{
+				attributeList.push_back(elementAttribute(L"mapFile", _variant_t(theMap.data())));
+			}
+			oxyMeshSection::oxyMeshTexture::oxyMeshTexture(oxyMeshElementPtr theMeshElement, std::wstring inputMap)
+			{
+				theTextureElement = std::make_shared<oxyMeshTextureElement>(theMeshElement, inputMap);
 			}
 }
 	}

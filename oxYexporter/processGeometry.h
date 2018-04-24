@@ -220,7 +220,7 @@ Mesh& extractMeshFromObjectState(ObjectState theState, TimeValue t, bool &isGeom
 Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry);
 
 //int processMesh( Mesh &theMesh, FILE* expFile = stdout );
-int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection);
+int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection, std::wstring& textureFileName);
 
 void getNormalsPerMeshFace( Mesh &theMesh, int theFace );
 

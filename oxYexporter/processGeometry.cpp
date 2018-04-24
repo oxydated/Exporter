@@ -88,7 +88,7 @@ Mesh& extractMeshFromNode(INode* theNode, TimeValue t, bool &isGeometry) {
 	return extractMeshFromObjectState(theNode->EvalWorldState(t), t, isGeometry );
 }
 
-int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
+int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection, std::wstring& textureFileName) {
 
 	//static int meshID = 0;
 	//IXMLDOMElement *theMeshElement = NULL;
@@ -137,6 +137,10 @@ int processMesh(Mesh &theMesh, oxyde::exporter::XML::oxyGeometryElementPtr theGe
 		//insertVertexForMesh( theMeshElement, theFinal,	theVert,	vertPos.x, vertPos.y, vertPos.z, 
 		//												theTVert,	texCoord.x, texCoord.y, 
 		//												theNormal,	NormalVec.x, NormalVec.y, NormalVec.z );
+	}
+
+	if (!textureFileName.empty()) {
+		theMeshElement->setMeshTexture(textureFileName);
 	}
 
 	return thisMesh;

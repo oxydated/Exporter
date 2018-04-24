@@ -1,3 +1,5 @@
+#include <stdmat.h>
+#include <Path.h>
 #include "processSkin.h"
 #include "processGeometry.h"
 //#include "xmlSkinExporter.h"
@@ -52,7 +54,7 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 
 	//** create mesh node in geometry section here
 
-	int meshID = extractTargetMesh(theDerivedObj, skinIndexInModifierStack, theGeometrySection);
+	int meshID = extractTargetMesh(theDerivedObj, theNode, skinIndexInModifierStack, theGeometrySection);
 
 	int thisSkin = skinID++;
 
@@ -131,7 +133,7 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	return true;
 }
 
-int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
+int extractTargetMesh(IDerivedObject* theDerivedObj, INode* theNode, int skinIndexInModifierStack, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection) {
 	ObjectState theState;
 	int nextModifier = skinIndexInModifierStack + 1;
 	if (nextModifier == (theDerivedObj->NumModifiers())){
@@ -152,7 +154,18 @@ int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStac
 
 		////////////////////	actual mesh extraction process
 		//** pass mesh node to this function
-		meshID = processMesh(theMesh, theGeometrySection);
+		std::wstring textureFileName = L"";
+		Mtl* theMaterial = theNode->GetMtl();
+		if (theMaterial != nullptr || theMaterial->ClassID() == Class_ID(DMTL_CLASS_ID, 0)) {
+			StdMat *theStdMaterial = (StdMat*)(theMaterial);
+			Texmap* theTexMap = theStdMaterial->GetSubTexmap(ID_DI);
+			if (theTexMap != nullptr || theTexMap->ClassID() == Class_ID(BMTEX_CLASS_ID, 0)) {
+				BitmapTex* theBitmap = (BitmapTex*)(theTexMap);
+				textureFileName = std::wstring(MaxSDK::Util::Path(theBitmap->GetMapName()).StripToLeaf().GetString());
+			}
+
+		}
+		meshID = processMesh(theMesh, theGeometrySection, textureFileName);
 	}
 	return meshID;
 }

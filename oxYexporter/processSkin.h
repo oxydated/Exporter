@@ -13,6 +13,6 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	oxyde::exporter::XML::oxyObjectListPtr theObjectList, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection);
 
 //int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, FILE* expFile);
-int extractTargetMesh(IDerivedObject* theDerivedObj, int skinIndexInModifierStack, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection);
+int extractTargetMesh(IDerivedObject* theDerivedObj, INode* theNode, int skinIndexInModifierStack, oxyde::exporter::XML::oxyGeometryElementPtr theGeometrySection);
 
 #endif

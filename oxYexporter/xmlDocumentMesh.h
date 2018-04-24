@@ -27,6 +27,9 @@ namespace oxyde {
 				class oxyMeshVertices;
 				using oxyMeshVerticesPtr = std::shared_ptr<oxyMeshVertices>;
 
+				class oxyMeshTexture;
+				using oxyMeshTexturePtr = std::shared_ptr<oxyMeshTexture>;
+
 			private:
 
 				class oxyMeshElement : public oxyDocumentElement {
@@ -48,6 +51,7 @@ namespace oxyde {
 				int getMeshID() { return theMeshElement->getMeshID(); }
 				oxyMeshFacesPtr setMeshFaces(int inputnumFaces);
 				oxyMeshVerticesPtr setMeshVertices(int inputnumVertices);
+				oxyMeshTexturePtr setMeshTexture(std::wstring inputMap);
 			};
 
 			using oxyMeshSectionPtr = std::shared_ptr<oxyMeshSection>;
@@ -124,6 +128,27 @@ namespace oxyde {
 			public:
 				oxyMeshVertices(oxyMeshElementPtr theMeshElement, int inputnumVertices);
 				void addVertex(int inputvertexID, int inputtheVert, float inputx, float inputy, float inputz, int inputtheTVert, float inputu, float inputv, int inputtheNormal, float inputnx, float inputny, float inputnz);
+			};
+
+			class oxyMeshSection::oxyMeshTexture {
+			private:
+				class oxyMeshTextureElement : oxyDocumentElement {
+					//<vertices numVertices = "2882">
+				public:
+					oxyMeshTextureElement(oxyMeshElementPtr theMeshElement, std::wstring inputMap);
+					oxyMeshTextureElement() = delete;
+
+				private:
+					std::wstring theMap;
+					void buildListOfAttributes() override;
+				};
+
+				using oxyMeshTextureElementPtr = std::shared_ptr<oxyMeshTextureElement>;
+				oxyMeshTextureElementPtr theTextureElement;
+
+			public:
+				oxyMeshTexture(oxyMeshElementPtr theMeshElement, std::wstring inputMap);
+
 			};
 
 		}
