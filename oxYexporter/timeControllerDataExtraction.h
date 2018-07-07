@@ -60,13 +60,14 @@ namespace oxyde {
 				controllerDataExtractor_ptr m_scaleController;
 			};
 
-			class XYZControllerDataExtractor : public controllerDataExtractor {
+			class XYZControllerDataExtractor : public keyControllerDataExtractor {
 			public:
 				std::set<TimeValue> getKeyTimes();
 				void getValueForTime(TimeValue theTime, float &x, float &y, float &z);
 				void getValueForTime(TimeValue theTime, Quat &q);
 
 			protected:
+				IKeyControl* GetKeyControlInterfacePointer();
 				explicit XYZControllerDataExtractor(Control *theControl);
 				controllerDataExtractor_ptr m_XController;
 				controllerDataExtractor_ptr m_YController;

@@ -1,4 +1,6 @@
+#include <sstream>
 #include "controllerDataExtractor.h"
+#include "debugLog.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -9,6 +11,13 @@ namespace oxyde {
 			INode* controllerDataExtractor::currentNode = nullptr;
 
 			controllerDataExtractor_ptr controllerDataExtractor::buildExtractor(Control* theControl) {
+
+				std::wstringstream theStream;
+				theStream << std::wstring(theControl->NodeName()) << L" ... ";
+				Class_ID theClassID = theControl->ClassID();
+				theStream << std::hex << theClassID.PartA() << L":" << std::hex << theClassID.PartB();
+				oxyde::log::printText(theStream.str());
+
 				auto foundFactory = factoriesMap.find(theControl->ClassID());
 				return foundFactory != factoriesMap.end() ?
 					foundFactory->second(theControl) :
@@ -26,6 +35,8 @@ namespace oxyde {
 
 			std::set<TimeValue> keyControllerDataExtractor::getKeyTimes() {
 				std::set<TimeValue> timeSet;
+				timeSet.insert(TimeValue(0));
+
 				IKeyControl* keyControl = GetKeyControlInterfacePointer();
 				int numKeys = keyControl->GetNumKeys();
 				for (int i = 0; i < numKeys; i++) {

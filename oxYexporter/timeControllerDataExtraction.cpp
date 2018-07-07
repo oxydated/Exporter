@@ -654,6 +654,11 @@ namespace oxyde {
 					m_rotationController = buildExtractor(m_Control->GetRotationController());
 					m_scaleController = buildExtractor(m_Control->GetScaleController());
 				}
+				else {
+					m_positionController = nullptr;
+					m_rotationController = nullptr;
+					m_scaleController = nullptr;
+				}
 			}
 
 			IKeyControl * PRScontrollerDataExtractor::GetKeyControlInterfacePointer()
@@ -664,6 +669,7 @@ namespace oxyde {
 			std::set<TimeValue> PRScontrollerDataExtractor::getKeyTimes()
 			{
 				std::set<TimeValue> keyTimes;
+				keyTimes.insert(TimeValue(0));
 
 				std::shared_ptr<XYZControllerDataExtractor>posController_ptr = std::dynamic_pointer_cast<XYZControllerDataExtractor>(m_positionController);
 				if (posController_ptr)
@@ -685,6 +691,20 @@ namespace oxyde {
 					tempSet.clear();
 				}
 
+				//std::set<TimeValue> PRSset = keyControllerDataExtractor::getKeyTimes();
+				//for (auto&& t : PRSset) {
+				//	keyTimes.insert(t);
+				//}
+				//PRSset.clear();
+
+				IKeyControl* keyControl = GetKeyControlInterfacePointer();
+				if (keyControl != nullptr) {
+					int numKeys = keyControl->GetNumKeys();
+					for (int i = 0; i < numKeys; i++) {
+						keyTimes.insert(m_Control->GetKeyTime(i));
+					}
+				}
+
 				// Not treating Scale Transform this time. So I don't care about scale keyframes.
 
 				return keyTimes;
@@ -693,36 +713,57 @@ namespace oxyde {
 			std::set<TimeValue> XYZControllerDataExtractor::getKeyTimes()
 			{
 				std::set<TimeValue> keyTimes;
+				keyTimes.insert(TimeValue(0));
 
-				std::shared_ptr<keyControllerDataExtractor>XKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_XController);
-				if (XKeyController_ptr)
-				{
-					std::set<TimeValue> tempSet = XKeyController_ptr->getKeyTimes();
+				if (!m_Control->IsLeaf()) {
+
+					if (m_XController) {
+						std::shared_ptr<keyControllerDataExtractor>XKeyController_ptr = std::static_pointer_cast<keyControllerDataExtractor>(m_XController);
+						if (XKeyController_ptr)
+						{
+							std::set<TimeValue> tempSet = XKeyController_ptr->getKeyTimes();
+							for (auto&& t : tempSet) {
+								keyTimes.insert(t);
+							}
+							tempSet.clear();
+						}
+					}
+
+					if (m_YController) {
+						std::shared_ptr<keyControllerDataExtractor>YKeyController_ptr = std::static_pointer_cast<keyControllerDataExtractor>(m_YController);
+						if (YKeyController_ptr)
+						{
+							std::set<TimeValue> tempSet = YKeyController_ptr->getKeyTimes();
+							for (auto&& t : tempSet) {
+								keyTimes.insert(t);
+							}
+							tempSet.clear();
+						}
+					}
+
+					if (m_ZController) {
+						std::shared_ptr<keyControllerDataExtractor>ZKeyController_ptr = std::static_pointer_cast<keyControllerDataExtractor>(m_ZController);
+						if (ZKeyController_ptr)
+						{
+							std::set<TimeValue> tempSet = ZKeyController_ptr->getKeyTimes();
+							for (auto&& t : tempSet) {
+								keyTimes.insert(t);
+							}
+							tempSet.clear();
+						}
+					}
+				}
+				else {
+					int isKeyable = m_Control->IsKeyable();
+					int test = isKeyable == 1;
+					
+					std::set<TimeValue> tempSet = keyControllerDataExtractor::getKeyTimes();
 					for (auto&& t : tempSet) {
 						keyTimes.insert(t);
 					}
 					tempSet.clear();
 				}
 
-				std::shared_ptr<keyControllerDataExtractor>YKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_YController);
-				if (YKeyController_ptr)
-				{
-					std::set<TimeValue> tempSet = YKeyController_ptr->getKeyTimes();
-					for (auto&& t : tempSet) {
-						keyTimes.insert(t);
-					}
-					tempSet.clear();
-				}
-
-				std::shared_ptr<keyControllerDataExtractor>ZKeyController_ptr = std::dynamic_pointer_cast<keyControllerDataExtractor>(m_ZController);
-				if (ZKeyController_ptr)
-				{
-					std::set<TimeValue> tempSet = ZKeyController_ptr->getKeyTimes();
-					for (auto&& t : tempSet) {
-						keyTimes.insert(t);
-					}
-					tempSet.clear();
-				}
 				return keyTimes;
 			}
 
@@ -741,7 +782,12 @@ namespace oxyde {
 				m_Control->GetValue(theTime, (void*)(&q), FOREVER, CTRL_ABSOLUTE);
 			}
 
-			XYZControllerDataExtractor::XYZControllerDataExtractor(Control *theControl) : controllerDataExtractor(theControl)
+			IKeyControl * XYZControllerDataExtractor::GetKeyControlInterfacePointer()
+			{
+				return GetKeyControlInterface(m_Control);
+			}
+
+			XYZControllerDataExtractor::XYZControllerDataExtractor(Control *theControl) : keyControllerDataExtractor(theControl)
 			{
 				if (!m_Control->IsLeaf()) {
 					DebugPrint(L"XYZControllerDataExtractor is NOT leaf\n");
@@ -803,6 +849,7 @@ namespace oxyde {
 			void rotationControllerDataExtractor::registerMe()
 			{
 				registerFactory(rotationControllerDataExtractor::buildRotationControllerDataExtractor, getClass_ID());
+				registerFactory(rotationControllerDataExtractor::buildRotationControllerDataExtractor, Class_ID(TCBINTERP_ROTATION_CLASS_ID, 0x0));
 			}
 
 			controllerDataExtractor_ptr rotationControllerDataExtractor::buildRotationControllerDataExtractor(Control* theControl)
