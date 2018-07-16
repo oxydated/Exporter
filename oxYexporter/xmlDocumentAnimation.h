@@ -88,6 +88,28 @@ namespace oxyde {
 				interpolationDataElement(oxyDualQuatKeyElementPtr  theParent, float inputangle, float inputux, float inputuy, float inputuz, float inputslide, float inputmx, float inputmy, float inputmz);
 				void buildListOfAttributes() override;
 			};
+
+			class baseSpinnerDataElement :public oxyDocumentElement {
+			protected:
+				std::wstring sourceName;
+				float qs; float qx; float qy; float qz; float dqs; float dqx; float dqy; float dqz;
+				void buildListOfAttributes() override;
+
+			public:
+				baseSpinnerDataElement(oxyDocumentPtr theInputDocument, std::wstring theElementName) = delete;
+				baseSpinnerDataElement(oxyAnimationElementPtr  theParent, std::wstring insourceName, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz);
+			};
+
+			class tipSpinnerDataElement :public oxyDocumentElement {
+			protected:
+				std::wstring sourceName;
+				float qs; float qx; float qy; float qz; float dqs; float dqx; float dqy; float dqz;
+				void buildListOfAttributes() override;
+
+			public:
+				tipSpinnerDataElement(oxyDocumentPtr theInputDocument, std::wstring theElementName) = delete;
+				tipSpinnerDataElement(oxyAnimationElementPtr  theParent, std::wstring insourceName, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz);
+			};
 		}
 	}
 }

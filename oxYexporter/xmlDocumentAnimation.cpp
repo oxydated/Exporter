@@ -32,7 +32,7 @@ namespace oxyde {
 			) {
 				oxyDualQuatKeyElementPtr theKey = std::shared_ptr<oxyDualQuatKeyElement>(new oxyDualQuatKeyElement(theParent, inputstartTime, inputendTime));
 				std::shared_ptr<startingDualQuatElement> theSDQelemnt = std::shared_ptr<startingDualQuatElement>(new startingDualQuatElement(
-					theKey,  inputqs,  inputqx,  inputqy,  inputqz,  inputdqs,  inputdqx,  inputdqy,  inputdqz));
+					theKey, inputqs, inputqx, inputqy, inputqz, inputdqs, inputdqx, inputdqy, inputdqz));
 				std::shared_ptr<interpolationDataElement> theInterpData = std::shared_ptr<interpolationDataElement>(new interpolationDataElement(
 					theKey, inputangle, inputux, inputuy, inputuz, inputslide, inputmx, inputmy, inputmz));
 				return theKey;
@@ -44,7 +44,7 @@ namespace oxyde {
 				attributeList.push_back(elementAttribute(L"endTime", _variant_t(endTime)));
 			}
 
-			startingDualQuatElement::startingDualQuatElement(oxyDualQuatKeyElementPtr theParent, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz):
+			startingDualQuatElement::startingDualQuatElement(oxyDualQuatKeyElementPtr theParent, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz) :
 				oxyDocumentElement(theParent, L"startingDualQuat"),
 				qs(inputqs), qx(inputqx), qy(inputqy), qz(inputqz), dqs(inputdqs), dqx(inputdqx), dqy(inputdqy), dqz(inputdqz)
 			{
@@ -64,7 +64,7 @@ namespace oxyde {
 			}
 			interpolationDataElement::interpolationDataElement(oxyDualQuatKeyElementPtr theParent, float inputangle, float inputux, float inputuy, float inputuz, float inputslide, float inputmx, float inputmy, float inputmz) :
 				oxyDocumentElement(theParent, L"interpolationParam"),
-				angle(inputangle),  ux(inputux), uy(inputuy), uz(inputuz), slide(inputslide), mx(inputmx), my(inputmy), mz(inputmz)
+				angle(inputangle), ux(inputux), uy(inputuy), uz(inputuz), slide(inputslide), mx(inputmx), my(inputmy), mz(inputmz)
 			{
 				buildListOfAttributes();
 				setElementAttributes();
@@ -79,6 +79,50 @@ namespace oxyde {
 				attributeList.push_back(elementAttribute(L"mx", variantFromFloat(mx)));
 				attributeList.push_back(elementAttribute(L"my", variantFromFloat(my)));
 				attributeList.push_back(elementAttribute(L"mz", variantFromFloat(mz)));
+			}
+
+			baseSpinnerDataElement::baseSpinnerDataElement(oxyAnimationElementPtr theParent, std::wstring insourceName, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz) :
+				oxyDocumentElement(theParent, L"spinnerBase"), sourceName(insourceName),
+				qs(inputqs), qx(inputqx), qy(inputqy), qz(inputqz), dqs(inputdqs), dqx(inputdqx), dqy(inputdqy), dqz(inputdqz)
+			{
+				buildListOfAttributes();
+				setElementAttributes();
+			}
+
+			void baseSpinnerDataElement::buildListOfAttributes()
+			{
+				attributeList.push_back(elementAttribute(L"source", _variant_t(sourceName.data())));
+
+				attributeList.push_back(elementAttribute(L"qs", variantFromFloat(qs)));
+				attributeList.push_back(elementAttribute(L"qx", variantFromFloat(qx)));
+				attributeList.push_back(elementAttribute(L"qy", variantFromFloat(qy)));
+				attributeList.push_back(elementAttribute(L"qz", variantFromFloat(qz)));
+				attributeList.push_back(elementAttribute(L"dqs", variantFromFloat(dqs)));
+				attributeList.push_back(elementAttribute(L"dqx", variantFromFloat(dqx)));
+				attributeList.push_back(elementAttribute(L"dqy", variantFromFloat(dqy)));
+				attributeList.push_back(elementAttribute(L"dqz", variantFromFloat(dqz)));
+			}
+
+			tipSpinnerDataElement::tipSpinnerDataElement(oxyAnimationElementPtr theParent, std::wstring insourceName, float inputqs, float inputqx, float inputqy, float inputqz, float inputdqs, float inputdqx, float inputdqy, float inputdqz) :
+				oxyDocumentElement(theParent, L"spinnerTip"), sourceName(insourceName),
+				qs(inputqs), qx(inputqx), qy(inputqy), qz(inputqz), dqs(inputdqs), dqx(inputdqx), dqy(inputdqy), dqz(inputdqz)
+			{
+				buildListOfAttributes();
+				setElementAttributes();
+			}
+
+			void tipSpinnerDataElement::buildListOfAttributes()
+			{
+				attributeList.push_back(elementAttribute(L"source", _variant_t(sourceName.data())));
+
+				attributeList.push_back(elementAttribute(L"qs", variantFromFloat(qs)));
+				attributeList.push_back(elementAttribute(L"qx", variantFromFloat(qx)));
+				attributeList.push_back(elementAttribute(L"qy", variantFromFloat(qy)));
+				attributeList.push_back(elementAttribute(L"qz", variantFromFloat(qz)));
+				attributeList.push_back(elementAttribute(L"dqs", variantFromFloat(dqs)));
+				attributeList.push_back(elementAttribute(L"dqx", variantFromFloat(dqx)));
+				attributeList.push_back(elementAttribute(L"dqy", variantFromFloat(dqy)));
+				attributeList.push_back(elementAttribute(L"dqz", variantFromFloat(dqz)));
 			}
 		}
 	}
