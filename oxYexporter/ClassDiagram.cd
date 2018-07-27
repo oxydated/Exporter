@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="oxyde::exporter::controller::rotationControllerDataExtractor">
+    <Position X="0.5" Y="0.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAwAAAAAAAAABAAAAAAAgAQAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>timeControllerDataExtraction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="oxyde::exporter::controller::matrixControllerDataExtractor">
+    <Position X="11.25" Y="1.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAABCAACAAAAAAA=</HashCode>
+      <FileName>timeControllerDataExtraction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="oxyde::exporter::controller::keyControllerDataExtractor">
+    <Position X="11.5" Y="6" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAEAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>controllerDataExtractor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="oxyde::exporter::controller::perFrameControllerDataExtractor">
+    <Position X="7.5" Y="3.75" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAIAAEAAAAEAgAAAAAAAARAAACAAAAAAA=</HashCode>
+      <FileName>perFrameControllerDataExtractor.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="oxyde::exporter::controller::positionControllerDataExtractor">
+    <Position X="0.5" Y="3.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAABAAAABAAgAAAAAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>timeControllerDataExtraction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="oxyde::exporter::controller::XYZControllerDataExtractor">
+    <Position X="4.5" Y="5.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAEAAAAAABAAAAAAQAAAACAAAAAAAA=</HashCode>
+      <FileName>timeControllerDataExtraction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

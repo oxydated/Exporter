@@ -34,6 +34,8 @@ namespace oxyde {
 					INodePtr theBoneNode = theSkinInterface->GetBone(i);
 					Matrix3 theMatrix;
 
+					oxyde::log::printText(theBoneNode->GetName());
+
 					theSkinInterface->GetBoneInitTM(theBoneNode, theMatrix);
 
 					matrix4x4 m;
