@@ -47,6 +47,8 @@ namespace oxyde {
 			public:
 				virtual std::set<TimeValue> getKeyTimes();
 
+				virtual bool doesItHaveKeyTime();
+
 			protected:
 				explicit keyControllerDataExtractor(Control* theControl) :controllerDataExtractor(theControl) {}
 				virtual IKeyControl* GetKeyControlInterfacePointer() = 0;

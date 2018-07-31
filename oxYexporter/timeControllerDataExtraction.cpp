@@ -426,6 +426,8 @@ namespace oxyde {
 					
 					float transQSanityCheck[8];
 
+					oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = nullptr;
+
 					if (pair.first.first != pair.second.first) {
 
 						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
@@ -436,7 +438,7 @@ namespace oxyde {
 
 						//oxyde::exporter::XML::oxyDualQuatTrackElementPtr theDualQuatTrackElement
 
-						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+						theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
 							pair.first.first, pair.second.first,
 							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
 							angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
@@ -463,7 +465,7 @@ namespace oxyde {
 
 					}
 					else {
-						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+						theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
 							pair.first.first, pair.second.first,
 							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
 							0., 1., 0., 0., 0., 0., 0., 0.

@@ -45,6 +45,16 @@ namespace oxyde {
 				return timeSet;
 			}
 
+			bool keyControllerDataExtractor::doesItHaveKeyTime() {
+				std::set<TimeValue> timeSet;
+				timeSet.insert(TimeValue(0));
+
+				IKeyControl* keyControl = GetKeyControlInterfacePointer();
+				int numKeys = keyControl->GetNumKeys();
+
+				return numKeys > 0;
+			}
+
 		}
 	}
 }

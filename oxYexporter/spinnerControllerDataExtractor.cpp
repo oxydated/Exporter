@@ -3,6 +3,7 @@
 #include "linAlg.h"
 #include "dualQuaternionFunctions.h"
 #include "xmlDocumentAnimation.h"
+#include "skinDataExtraction.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -76,6 +77,9 @@ namespace oxyde {
 					}
 				}
 
+				std::array<double, 8> quatToDouble = { DUALQUAARRAY(quat) };
+				oxyde::exporter::skin::skinPoseCorrector::addLocalTransform(currentNode, quatToDouble);
+
 				std::shared_ptr<oxyde::exporter::XML::baseSpinnerDataElement> baseElement = std::make_shared<oxyde::exporter::XML::baseSpinnerDataElement>(
 					theAnimationElement, std::wstring(sourceName), quat[0], quat[1], quat[2], quat[3], quat[4], quat[5], quat[6], quat[7]	);
 			}
@@ -117,6 +121,9 @@ namespace oxyde {
 						}
 					}
 				}
+
+				std::array<double, 8> quatToDouble = { DUALQUAARRAY(quat) };
+				oxyde::exporter::skin::skinPoseCorrector::addLocalTransform(currentNode, quatToDouble);
 
 				std::shared_ptr<oxyde::exporter::XML::tipSpinnerDataElement> baseElement = std::make_shared<oxyde::exporter::XML::tipSpinnerDataElement>(
 					theAnimationElement, std::wstring(sourceName), quat[0], quat[1], quat[2], quat[3], quat[4], quat[5], quat[6], quat[7]);

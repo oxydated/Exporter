@@ -121,6 +121,8 @@ namespace oxyde {
 							if (transformFromParentToChild[0] < 0.) {
 								dualQuat complQuat = nodeToSkinPoseDict[topNode];
 								nodeToSkinPoseDict[topNode] = { -complQuat[0], -complQuat[1], -complQuat[2], -complQuat[3], -complQuat[4], -complQuat[5], -complQuat[6], -complQuat[7] };
+
+								oxyde::log::printNamedParameter(L"Signal inverted: ", topNode->GetName());
 							}
 						}
 
