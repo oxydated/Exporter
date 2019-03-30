@@ -7,7 +7,7 @@ namespace oxyde {
 
 			class defaultControllerDataExtractor : public controllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildDefaultControllerDataExtractor(Control* theControl);
@@ -18,8 +18,8 @@ namespace oxyde {
 
 			class floatControllerDataExtractor : public keyControllerDataExtractor {
 			public:
-				float getValueForTime(TimeValue theTime);
-				void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				//float getValueForTime(TimeValue theTime);
+				void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 
 				static Class_ID getClass_ID();
 				static void registerMe();
@@ -41,23 +41,23 @@ namespace oxyde {
 				explicit matrixControllerDataExtractor(Control* theControl) :keyControllerDataExtractor(theControl){}
 			};
 
-			class PRScontrollerDataExtractor : public matrixControllerDataExtractor {
+			class PRScontrollerDataExtractor : public controllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
-				std::set<TimeValue> getKeyTimes();
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
+				//std::set<TimeValue> getKeyTimes();
 
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildPRScontrollerDataExtractor(Control* theControl);
 
 			protected:
-				void getLocalMatrixForTime(TimeValue t, double m[]);
-				void getDualQuatForTime(TimeValue t, float quat[]);
+				//void getLocalMatrixForTime(TimeValue t, double m[]);
+				//void getDualQuatForTime(TimeValue t, float quat[]);
 				IKeyControl* GetKeyControlInterfacePointer();
 				explicit PRScontrollerDataExtractor(Control *theControl);
-				controllerDataExtractor_ptr m_positionController;
-				controllerDataExtractor_ptr m_rotationController;
-				controllerDataExtractor_ptr m_scaleController;
+				//controllerDataExtractor_ptr m_positionController;
+				//controllerDataExtractor_ptr m_rotationController;
+				//controllerDataExtractor_ptr m_scaleController;
 			};
 
 			class XYZControllerDataExtractor : public keyControllerDataExtractor {
@@ -76,7 +76,7 @@ namespace oxyde {
 
 			class positionControllerDataExtractor : public XYZControllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildPositionControllerDataExtractor(Control* theControl);
@@ -87,7 +87,7 @@ namespace oxyde {
 
 			class rotationControllerDataExtractor : public XYZControllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 				int getEulerAngleOrder();
 				static Class_ID getClass_ID();
 				static void registerMe();
@@ -99,7 +99,7 @@ namespace oxyde {
 
 			class bipSlaveControllerDataExtractor : public matrixControllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildBipSlaveControllerDataExtractor(Control* theControl);
@@ -114,7 +114,7 @@ namespace oxyde {
 
 			class bipBodyControllerDataExtractor : public controllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) override;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
 				static Class_ID getClass_ID();
 				static void registerMe();
 				static controllerDataExtractor_ptr buildBipBodyControllerDataExtractor(Control* theControl);

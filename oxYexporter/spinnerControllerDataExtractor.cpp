@@ -9,17 +9,17 @@ namespace oxyde {
 	namespace exporter {
 		namespace controller {
 
-			void spinnerControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
+			void spinnerControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement)
 			{
 				IScriptCtrl* theScriptControl = NULL;
 				theScriptControl = (IScriptCtrl*)m_Control->GetInterface(IID_SCRIPT_CONTROL);
 				if (theScriptControl != NULL) {
 					MSTR theScriptControlDescription = theScriptControl->GetDescription();
 					if (theScriptControlDescription == _M("BaseBoneController")) {
-						processBaseSpinningBoneControl(theAnimationElement);
+						processBaseSpinningBoneControl(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
 					}
 					if (theScriptControlDescription == _M("SpinningBoneController")) {
-						processTipSpinningBoneControl(theAnimationElement);
+						processTipSpinningBoneControl(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
 					}
 				}
 			}

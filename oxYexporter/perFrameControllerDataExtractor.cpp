@@ -21,14 +21,14 @@ namespace oxyde {
 				}
 				return timeSet;
 			}
-			void perFrameControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
+			void perFrameControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement)
 			{
-				buildTrack(theAnimationElement);
+				buildTrack(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
 			}
 
 			void perFrameControllerDataExtractor::registerMe(Class_ID theID)
 			{
-				registerFactory(perFrameControllerDataExtractor::buildPerFrameControllerDataExtractor, theID);
+				registerFactory(perFrameControllerDataExtractor::buildPerFrameControllerDataExtractor, theID, true);
 			}
 
 			controllerDataExtractor_ptr perFrameControllerDataExtractor::buildPerFrameControllerDataExtractor(Control * theControl)
@@ -61,6 +61,11 @@ namespace oxyde {
 				return GetKeyControlInterface(m_Control);
 			}
 
+			bool perFrameControllerDataExtractor::isPerFrame()
+			{
+				return true;
+			}
+
 		}
 	}
 }
@@ -74,6 +79,10 @@ namespace {
 			oxyde::exporter::controller::perFrameControllerDataExtractor::registerMe(Class_ID(0x1CBB1D2F, 0x30EA5264));
 
 			oxyde::exporter::controller::perFrameControllerDataExtractor::registerMe(Class_ID(0xDAB5C9D, 0x5DB56555));
+
+			oxyde::exporter::controller::perFrameControllerDataExtractor::registerMe(Class_ID(3895672849L, 2930979016L));
+
+			oxyde::exporter::controller::perFrameControllerDataExtractor::registerMe(Class_ID(8209L, 0L));
 		}
 	};
 

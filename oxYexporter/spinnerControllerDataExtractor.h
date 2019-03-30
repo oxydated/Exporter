@@ -8,7 +8,7 @@ namespace oxyde {
 
 			class spinnerControllerDataExtractor :public controllerDataExtractor {
 			public:
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement);
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement);
 				static void registerMe();
 				static Class_ID getClass_ID();
 				static controllerDataExtractor_ptr buildSpinnerControllerDataExtractor(Control* theControl);

@@ -7,12 +7,14 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <cmath>
 #include "matrixUtility.h"
 #include "linAlg.h"
 #include "dualQuaternionFunctions.h"
 #include "debugLog.h"
 #include "timeControllerDataExtraction.h"
 #include "skinDataExtraction.h"
+#include "xmlDocumentPRS.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -22,7 +24,7 @@ namespace oxyde {
 				return Class_ID();
 			}
 
-			void defaultControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
+			void defaultControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) {
 				DebugPrint(L"This is a default extractor test... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 			}
 
@@ -34,14 +36,103 @@ namespace oxyde {
 				return std::dynamic_pointer_cast<controllerDataExtractor>(std::make_shared<defaultControllerDataExtractor>(defaultControllerDataExtractor(theControl)));
 			}
 
-			float floatControllerDataExtractor::getValueForTime(TimeValue theTime) {
-				float value = 0.0;
-				m_Control->GetValue(theTime, (void*)&value, FOREVER, CTRL_ABSOLUTE);
-				return 0.0;
-			}
+			//float floatControllerDataExtractor::getValueForTime(TimeValue theTime) {
+			//	float value = 0.0;
+			//	m_Control->GetValue(theTime, (void*)&value, FOREVER, CTRL_ABSOLUTE);
+			//	return 0.0;
+			//}
 
-			void floatControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
-				DebugPrint(L"This is a float extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
+			void floatControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) {
+				//DebugPrint(L"This is a float extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
+				IKeyControl* theKeyControl = GetKeyControlInterface(m_Control);
+
+				if (theKeyControl != NULL) {
+					int numKeys = theKeyControl->GetNumKeys();
+
+					oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, numKeys);
+
+					if (numKeys > 0) {
+						IKey* theKey = (IKey*)(new char[theKeyControl->GetKeySize()]);
+						bool firstFrame = true;
+
+						float startTime;
+						float outTangent;
+						float outTangentLength;
+						float startValue;
+
+						float endTime;
+						float inTangent;
+						float inTangentLength;
+						float endValue;
+
+						for (int i = 0; i < numKeys; i++) {
+							theKeyControl->GetKey(i, theKey);
+							IBezFloatKey* theBezFloatKey = static_cast<IBezFloatKey*>(theKey);
+
+							endTime = theBezFloatKey->time;
+							inTangent = theBezFloatKey->intan;
+							inTangentLength = theBezFloatKey->inLength;
+							endValue = theBezFloatKey->val;
+
+							if (!firstFrame) {
+								float b0 = startValue;
+								float b1 = outTangent*outTangentLength*(endTime - startTime) + startValue;
+								float b2 = endValue + inTangent*inTangentLength*(endTime - startTime);
+								float b3 = endValue;
+
+								float B0, B1, B2, B3;
+
+								int outTanType = GetOutTanType(theBezFloatKey->flags);
+								int inTanType = GetInTanType(theBezFloatKey->flags);
+
+
+								//Smooth - Smooth			t*(3 * b1 + t*(-6 * b1 + 3 * b2 + (3 * b1 - 3 * b2 + b3)*t)) + b0*(1 + t*(-3 + (3 - t)*t))
+								if ((outTanType != BEZKEY_LINEAR) && (inTanType != BEZKEY_LINEAR)) {
+									B0 = b0;
+									B1 = -3 * b0 + 3 * b1;
+									B2 = 3 * b0 - 6 * b1 + 3 * b2;
+									B3 = -b0 + 3 * b1 - 3 * b2 + b3;
+								}
+
+								//Linear - Smooth			b0 + t*(-2 * b0 + 2 * b1 + t*(2 * b0 - 4 * b1 + 2 * b3 + (-b0 + 2 * b1 - b3)*t))
+								if ((outTanType == BEZKEY_LINEAR) && (inTanType != BEZKEY_LINEAR)) {
+									B0 = b0;
+									B1 = -2 * b0 + 2 * b1;
+									B2 = 2 * b0 - 4 * b1 + 2 * b3;
+									B3 = -b0 + 2 * b1 - b3;
+								}
+
+								//Smooth - Linear			b0 + t*(-b0 + b3 + t*(-b0 + 2 * b2 - b3 + (b0 - 2 * b2 + b3)*t))
+								if ((outTanType != BEZKEY_LINEAR) && (inTanType == BEZKEY_LINEAR)) {
+									B0 = b0;
+									B1 = -b0 + b3;
+									B2 = -b0 + 2 * b2 - b3;
+									B3 = b0 - 2 * b2 + b3;
+								}
+
+								//Linear - Linear			b0 - b0*t + b3*t
+								if ((outTanType == BEZKEY_LINEAR) && (inTanType == BEZKEY_LINEAR)) {
+									B0 = b0;
+									B1 = -b0 + b3;
+									B2 = 0.;
+									B3 = 0.;
+								}
+
+								oxyde::exporter::XML::oxyBezierKeyElementPtr theBezierKeyElement = std::make_shared<oxyde::exporter::XML::oxyBezierKeyElement>(theBezierTrackElement, startTime, endTime, B3, B2, B1, B0);
+
+							}
+
+							startTime = theBezFloatKey->time;
+							outTangent = theBezFloatKey->outtan;
+							outTangentLength = theBezFloatKey->outLength;
+							startValue = theBezFloatKey->val;
+
+							firstFrame = false;
+						}
+					}
+				}
+
+
 				return;
 			}
 
@@ -57,6 +148,7 @@ namespace oxyde {
 			{
 				return std::dynamic_pointer_cast<controllerDataExtractor>(std::make_shared<floatControllerDataExtractor>(floatControllerDataExtractor(theControl)));
 			}
+
 			IKeyControl * floatControllerDataExtractor::GetKeyControlInterfacePointer()
 			{
 				return GetKeyControlInterface(m_Control);
@@ -426,8 +518,6 @@ namespace oxyde {
 					
 					float transQSanityCheck[8];
 
-					oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = nullptr;
-
 					if (pair.first.first != pair.second.first) {
 
 						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
@@ -437,8 +527,13 @@ namespace oxyde {
 						//);
 
 						//oxyde::exporter::XML::oxyDualQuatTrackElementPtr theDualQuatTrackElement
+						if ((pair.second.first - pair.first.first)<= GetTicksPerFrame()) {
+							if (angleQ > pi) {
+								angleQ = angleQ - 2 * pi;
+							}
+						}
 
-						theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
 							pair.first.first, pair.second.first,
 							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
 							angleQ, transQParameters.Ux, transQParameters.Uy, transQParameters.Uz, transQParameters.theSfactor, transQParameters.Mx, transQParameters.My, transQParameters.Mz
@@ -465,19 +560,19 @@ namespace oxyde {
 
 					}
 					else {
-						theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
+						oxyde::exporter::XML::oxyDualQuatKeyElementPtr theKey = oxyde::exporter::XML::oxyDualQuatKeyElement::createDualQuatKey(theDualQuatTrackElement,
 							pair.first.first, pair.second.first,
 							startQ[0], startQ[1], startQ[2], startQ[3], startQ[4], startQ[5], startQ[6], startQ[7],
 							0., 1., 0., 0., 0., 0., 0., 0.
 						);
 
-						oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
-							1., 0., 0., 0., 0., 0., 0., 0.
-						);
+						//oxyde::log::printDualQuatParameters(L"transQSanityCheckParameters",
+						//	1., 0., 0., 0., 0., 0., 0., 0.
+						//);
 
-						oxyde::DQ::dual_Versor(0., 1., 0., 0., 0., 0., 0., 0.,
-							DUALQUAARRAY(transQSanityCheck)
-						);
+						//oxyde::DQ::dual_Versor(0., 1., 0., 0., 0., 0., 0., 0.,
+						//	DUALQUAARRAY(transQSanityCheck)
+						//);
 					}
 
 					if (pair.first.first == 0) {
@@ -519,117 +614,133 @@ namespace oxyde {
 				oxyde::log::printLine();
 			}
 
-			void PRScontrollerDataExtractor::getLocalMatrixForTime(TimeValue t, double m[]) {
-				Matrix3 localMatrix;
-				localMatrix.IdentityMatrix();
-				m_Control->GetValue(t, (void*)&localMatrix, FOREVER, CTRL_RELATIVE);
+			//void PRScontrollerDataExtractor::getLocalMatrixForTime(TimeValue t, double m[]) {
+			//	Matrix3 localMatrix;
+			//	localMatrix.IdentityMatrix();
+			//	m_Control->GetValue(t, (void*)&localMatrix, FOREVER, CTRL_RELATIVE);
 
-				m[0] = localMatrix.GetRow(0).x;		m[1] = localMatrix.GetRow(0).y;		m[2] = localMatrix.GetRow(0).z;		m[3] = 0.;
-				m[4] = localMatrix.GetRow(1).x;		m[5] = localMatrix.GetRow(1).y;		m[6] = localMatrix.GetRow(1).z;		m[7] = 0.;
-				m[8] = localMatrix.GetRow(2).x;		m[9] = localMatrix.GetRow(2).y;		m[10] = localMatrix.GetRow(2).z;	m[11] = 0.;
-				m[12] = localMatrix.GetRow(3).x;	m[13] = localMatrix.GetRow(3).y;	m[14] = localMatrix.GetRow(3).z;	m[15] = 1.;
-			}
+			//	m[0] = localMatrix.GetRow(0).x;		m[1] = localMatrix.GetRow(0).y;		m[2] = localMatrix.GetRow(0).z;		m[3] = 0.;
+			//	m[4] = localMatrix.GetRow(1).x;		m[5] = localMatrix.GetRow(1).y;		m[6] = localMatrix.GetRow(1).z;		m[7] = 0.;
+			//	m[8] = localMatrix.GetRow(2).x;		m[9] = localMatrix.GetRow(2).y;		m[10] = localMatrix.GetRow(2).z;	m[11] = 0.;
+			//	m[12] = localMatrix.GetRow(3).x;	m[13] = localMatrix.GetRow(3).y;	m[14] = localMatrix.GetRow(3).z;	m[15] = 1.;
+			//}
 
-			void PRScontrollerDataExtractor::getDualQuatForTime(TimeValue t, float quat[])
+			//void PRScontrollerDataExtractor::getDualQuatForTime(TimeValue t, float quat[])
+			//{
+			//	std::wstring outStr;
+			//	std::wostringstream outStream(outStr);
+			//	outStream << "__________________________________________________[" << t << "]" << std::endl;
+
+			//	float eulerX = 0.0, eulerY = 0.0, eulerZ = 0.0;
+			//	Quat q;
+			//	if (m_rotationController) {
+			//		auto rotationControl = std::dynamic_pointer_cast<rotationControllerDataExtractor>(m_rotationController);
+			//		if (rotationControl) {
+			//			rotationControl->getValueForTime(t, q);
+			//		}
+			//	}
+
+			//	float rotQuat[8];
+			//	oxyde::DQ::pure_Real_quaternion(q.w, q.x, q.y, q.z, DUALQUAARRAY(rotQuat));
+			//	//outStream << "rotQuat = {";
+			//	//outStream << rotQuat[0] << "," << rotQuat[1] << "," << rotQuat[2] << "," << rotQuat[3] << ",";
+			//	//outStream << rotQuat[4] << "," << rotQuat[5] << "," << rotQuat[6] << "," << rotQuat[7];
+			//	//outStream << "}.dualQuatUnit";
+			//	//outStream << std::endl;
+
+			//	float x = 0.0, y = 0.0, z = 0.0;
+			//	if (m_positionController) {
+			//		auto positionControl = std::dynamic_pointer_cast<positionControllerDataExtractor>(m_positionController);
+			//		if (positionControl) {
+			//			positionControl->getValueForTime(t, x, y, z);
+			//		}
+			//	}
+
+			//	//outStream << "posControl = {" << x << ", " << y << ", " << z << "}" << std::endl;
+
+			//	float transQuat[8];
+			//	oxyde::DQ::translation_quaternion(x, y, z, DUALQUAARRAY(transQuat));
+			//	//outStream << "transQuat = {";
+			//	//outStream << transQuat[0] << "," << transQuat[1] << "," << transQuat[2] << "," << transQuat[3] << ",";
+			//	//outStream << transQuat[4] << "," << transQuat[5] << "," << transQuat[6] << "," << transQuat[7];
+			//	//outStream << "}.dualQuatUnit";
+			//	//outStream << std::endl;
+
+			//	oxyde::DQ::dual_quaternion_product( DUALQUAARRAY(transQuat), DUALQUAARRAY(rotQuat),DUALQUAARRAY(quat));
+			//	//outStream << "finalQuat = {";
+			//	//outStream << quat[0] << "," << quat[1] << "," << quat[2] << "," << quat[3] << ",";
+			//	//outStream << quat[4] << "," << quat[5] << "," << quat[6] << "," << quat[7];
+			//	//outStream << "}.dualQuatUnit";
+			//	//outStream << std::endl;
+
+			//	//std::wstring resultString(outStream.str());
+			//	//DebugOutputString(resultString.c_str());
+			//}
+
+			void PRScontrollerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement)
 			{
-				std::wstring outStr;
-				std::wostringstream outStream(outStr);
-				outStream << "__________________________________________________[" << t << "]" << std::endl;
+				//std::shared_ptr<oxyde::exporter::XML::baseSpinnerDataElement> baseElement = std::make_shared<oxyde::exporter::XML::baseSpinnerDataElement>(
+				//	theAnimationElement, std::wstring(sourceName), quat[0], quat[1], quat[2], quat[3], quat[4], quat[5], quat[6], quat[7]);
 
-				float eulerX = 0.0, eulerY = 0.0, eulerZ = 0.0;
-				Quat q;
-				if (m_rotationController) {
-					auto rotationControl = std::dynamic_pointer_cast<rotationControllerDataExtractor>(m_rotationController);
-					if (rotationControl) {
-						rotationControl->getValueForTime(t, q);
+				oxyde::exporter::XML::oxyPRSElementPtr thePRSElement = std::make_shared<oxyde::exporter::XML::oxyPRSElement>(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
+				
+				for (int i = 0; i < m_Control->NumSubs(); i++) {
+					Animatable* controlAnim = m_Control->SubAnim(i);
+					Control* animAsControl = dynamic_cast<Control*>(controlAnim);
+					if (animAsControl != nullptr) {
+						auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(animAsControl, currentNode);
+						theControllerExtractor->exportController(thePRSElement);
 					}
 				}
 
-				float rotQuat[8];
-				oxyde::DQ::pure_Real_quaternion(q.w, q.x, q.y, q.z, DUALQUAARRAY(rotQuat));
-				outStream << "rotQuat = {";
-				outStream << rotQuat[0] << "," << rotQuat[1] << "," << rotQuat[2] << "," << rotQuat[3] << ",";
-				outStream << rotQuat[4] << "," << rotQuat[5] << "," << rotQuat[6] << "," << rotQuat[7];
-				outStream << "}.dualQuatUnit";
-				outStream << std::endl;
 
-				float x = 0.0, y = 0.0, z = 0.0;
-				if (m_positionController) {
-					auto positionControl = std::dynamic_pointer_cast<positionControllerDataExtractor>(m_positionController);
-					if (positionControl) {
-						positionControl->getValueForTime(t, x, y, z);
-					}
-				}
 
-				outStream << "posControl = {" << x << ", " << y << ", " << z << "}" << std::endl;
+			//	//DebugPrint(L"This is a PRS Controller Extractor test\n");
+			//	std::set<TimeValue> keyTimes = getKeyTimes();
+			//	Matrix3 localMatrix;
+			//	for (auto&& t : keyTimes) {
+			//		localMatrix.IdentityMatrix();
+			//		m_Control->GetValue(t, (void*)&localMatrix, FOREVER, CTRL_RELATIVE);
 
-				float transQuat[8];
-				oxyde::DQ::translation_quaternion(x, y, z, DUALQUAARRAY(transQuat));
-				outStream << "transQuat = {";
-				outStream << transQuat[0] << "," << transQuat[1] << "," << transQuat[2] << "," << transQuat[3] << ",";
-				outStream << transQuat[4] << "," << transQuat[5] << "," << transQuat[6] << "," << transQuat[7];
-				outStream << "}.dualQuatUnit";
-				outStream << std::endl;
+			//		//std::wstring outStr;
+			//		//std::wostringstream outStream(outStr);
+			//		//outStream << L"	Time: " << t << std::endl;
 
-				oxyde::DQ::dual_quaternion_product( DUALQUAARRAY(transQuat), DUALQUAARRAY(rotQuat),DUALQUAARRAY(quat));
-				outStream << "finalQuat = {";
-				outStream << quat[0] << "," << quat[1] << "," << quat[2] << "," << quat[3] << ",";
-				outStream << quat[4] << "," << quat[5] << "," << quat[6] << "," << quat[7];
-				outStream << "}.dualQuatUnit";
-				outStream << std::endl;
+			//		//outStream << L"		" << localMatrix.GetRow(0).x << "   " << localMatrix.GetRow(0).y << "   " << localMatrix.GetRow(0).z << std::endl;
+			//		//outStream << L"		" << localMatrix.GetRow(1).x << "   " << localMatrix.GetRow(1).y << "   " << localMatrix.GetRow(1).z << std::endl;
+			//		//outStream << L"		" << localMatrix.GetRow(2).x << "   " << localMatrix.GetRow(2).y << "   " << localMatrix.GetRow(2).z << std::endl;
+			//		//outStream << L"		" << localMatrix.GetRow(3).x << "   " << localMatrix.GetRow(3).y << "   " << localMatrix.GetRow(3).z << std::endl;
 
-				std::wstring resultString(outStream.str());
-				DebugOutputString(resultString.c_str());
-			}
+			//		//outStream << std::endl;
 
-			void PRScontrollerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
-			{
-				DebugPrint(L"This is a PRS Controller Extractor test\n");
-				std::set<TimeValue> keyTimes = getKeyTimes();
-				Matrix3 localMatrix;
-				for (auto&& t : keyTimes) {
-					localMatrix.IdentityMatrix();
-					m_Control->GetValue(t, (void*)&localMatrix, FOREVER, CTRL_RELATIVE);
+			//		double m[16] = {
+			//			localMatrix.GetRow(0).x ,localMatrix.GetRow(0).y, localMatrix.GetRow(0).z, 0.,
+			//			localMatrix.GetRow(1).x ,localMatrix.GetRow(1).y, localMatrix.GetRow(1).z, 0.,
+			//			localMatrix.GetRow(2).x ,localMatrix.GetRow(2).y, localMatrix.GetRow(2).z, 0.,
+			//			localMatrix.GetRow(3).x ,localMatrix.GetRow(3).y, localMatrix.GetRow(3).z, 1.
+			//		};
+			//		double nx, ny, nz;
+			//		double cosTheta, sinTheta;
+			//		double slide;
+			//		double mx, my, mz;
 
-					std::wstring outStr;
-					std::wostringstream outStream(outStr);
-					outStream << L"	Time: " << t << std::endl;
+			//		oxyde::math::getDualQuaternionParametersFromMatrix(m, cosTheta, sinTheta, nx, ny, nz, slide, mx, my, mz);
 
-					outStream << L"		" << localMatrix.GetRow(0).x << "   " << localMatrix.GetRow(0).y << "   " << localMatrix.GetRow(0).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(1).x << "   " << localMatrix.GetRow(1).y << "   " << localMatrix.GetRow(1).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(2).x << "   " << localMatrix.GetRow(2).y << "   " << localMatrix.GetRow(2).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(3).x << "   " << localMatrix.GetRow(3).y << "   " << localMatrix.GetRow(3).z << std::endl;
+			//		//outStream << "Normal = {" << nx << ", " << ny << ", " << nz << "}" << std::endl;
+			//		//outStream << "Cos, Sin = {" << cosTheta << ", " << sinTheta << "}" << std::endl;
 
-					outStream << std::endl;
+			//		//outStream << "Slide = " << slide << std::endl;
+			//		//outStream << "Axis vector m = {" << mx << ", " << my << ", " << mz << "}" << std::endl;
 
-					double m[16] = {
-						localMatrix.GetRow(0).x ,localMatrix.GetRow(0).y, localMatrix.GetRow(0).z, 0.,
-						localMatrix.GetRow(1).x ,localMatrix.GetRow(1).y, localMatrix.GetRow(1).z, 0.,
-						localMatrix.GetRow(2).x ,localMatrix.GetRow(2).y, localMatrix.GetRow(2).z, 0.,
-						localMatrix.GetRow(3).x ,localMatrix.GetRow(3).y, localMatrix.GetRow(3).z, 1.
-					};
-					double nx, ny, nz;
-					double cosTheta, sinTheta;
-					double slide;
-					double mx, my, mz;
+			//		//std::wstring resultString(outStream.str());
+			//		//DebugOutputString(resultString.c_str());
+			//	}
+			//	keyTimes.clear();
 
-					oxyde::math::getDualQuaternionParametersFromMatrix(m, cosTheta, sinTheta, nx, ny, nz, slide, mx, my, mz);
-
-					outStream << "Normal = {" << nx << ", " << ny << ", " << nz << "}" << std::endl;
-					outStream << "Cos, Sin = {" << cosTheta << ", " << sinTheta << "}" << std::endl;
-
-					outStream << "Slide = " << slide << std::endl;
-					outStream << "Axis vector m = {" << mx << ", " << my << ", " << mz << "}" << std::endl;
-
-					std::wstring resultString(outStream.str());
-					DebugOutputString(resultString.c_str());
-				}
-				keyTimes.clear();
-
-				if (m_positionController)m_positionController->exportController(theAnimationElement);
-				if (m_rotationController)m_rotationController->exportController(theAnimationElement);
-				if (m_scaleController)m_scaleController->exportController(theAnimationElement);
-				buildTrack(theAnimationElement);
+			//	if (m_positionController)m_positionController->exportController(theAnimationElement);
+			//	if (m_rotationController)m_rotationController->exportController(theAnimationElement);
+			//	if (m_scaleController)m_scaleController->exportController(theAnimationElement);
+			//	buildTrack(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
 			}
 
 			Class_ID PRScontrollerDataExtractor::getClass_ID()
@@ -649,18 +760,17 @@ namespace oxyde {
 					);
 			}
 
-			PRScontrollerDataExtractor::PRScontrollerDataExtractor(Control* theControl) : matrixControllerDataExtractor(theControl)
+			PRScontrollerDataExtractor::PRScontrollerDataExtractor(Control* theControl) : controllerDataExtractor(theControl)
 			{
-				if (!m_Control->IsLeaf()) {
-					m_positionController = buildExtractor(m_Control->GetPositionController());
-					m_rotationController = buildExtractor(m_Control->GetRotationController());
-					m_scaleController = buildExtractor(m_Control->GetScaleController());
-				}
-				else {
-					m_positionController = nullptr;
-					m_rotationController = nullptr;
-					m_scaleController = nullptr;
-				}
+				//m_positionController = nullptr;
+				//m_rotationController = nullptr;
+				//m_scaleController = nullptr;
+
+				//if (!m_Control->IsLeaf()) {
+				//	if (m_Control->GetPositionController() != nullptr) m_positionController = buildExtractor(m_Control->GetPositionController());
+				//	if (m_Control->GetRotationController() != nullptr) m_rotationController = buildExtractor(m_Control->GetRotationController());
+				//	if (m_Control->GetScaleController() != nullptr) m_scaleController = buildExtractor(m_Control->GetScaleController());
+				//}
 			}
 
 			IKeyControl * PRScontrollerDataExtractor::GetKeyControlInterfacePointer()
@@ -668,49 +778,49 @@ namespace oxyde {
 				return GetKeyControlInterface(m_Control);
 			}
 
-			std::set<TimeValue> PRScontrollerDataExtractor::getKeyTimes()
-			{
-				std::set<TimeValue> keyTimes;
-				keyTimes.insert(TimeValue(0));
+			//std::set<TimeValue> PRScontrollerDataExtractor::getKeyTimes()
+			//{
+			//	std::set<TimeValue> keyTimes;
+			//	keyTimes.insert(TimeValue(0));
 
-				std::shared_ptr<XYZControllerDataExtractor>posController_ptr = std::dynamic_pointer_cast<XYZControllerDataExtractor>(m_positionController);
-				if (posController_ptr)
-				{
-					std::set<TimeValue> tempSet = posController_ptr->getKeyTimes();
-					for (auto&& t : tempSet) {
-						keyTimes.insert(t);
-					}
-					tempSet.clear();
-				}
+			//	std::shared_ptr<XYZControllerDataExtractor>posController_ptr = std::dynamic_pointer_cast<XYZControllerDataExtractor>(m_positionController);
+			//	if (posController_ptr)
+			//	{
+			//		std::set<TimeValue> tempSet = posController_ptr->getKeyTimes();
+			//		for (auto&& t : tempSet) {
+			//			keyTimes.insert(t);
+			//		}
+			//		tempSet.clear();
+			//	}
 
-				std::shared_ptr<XYZControllerDataExtractor>rotController_ptr = std::dynamic_pointer_cast<XYZControllerDataExtractor>(m_rotationController);
-				if (rotController_ptr)
-				{
-					std::set<TimeValue> tempSet = rotController_ptr->getKeyTimes();
-					for (auto&& t : tempSet) {
-						keyTimes.insert(t);
-					}
-					tempSet.clear();
-				}
+			//	std::shared_ptr<XYZControllerDataExtractor>rotController_ptr = std::dynamic_pointer_cast<XYZControllerDataExtractor>(m_rotationController);
+			//	if (rotController_ptr)
+			//	{
+			//		std::set<TimeValue> tempSet = rotController_ptr->getKeyTimes();
+			//		for (auto&& t : tempSet) {
+			//			keyTimes.insert(t);
+			//		}
+			//		tempSet.clear();
+			//	}
 
-				//std::set<TimeValue> PRSset = keyControllerDataExtractor::getKeyTimes();
-				//for (auto&& t : PRSset) {
-				//	keyTimes.insert(t);
-				//}
-				//PRSset.clear();
+			//	//std::set<TimeValue> PRSset = keyControllerDataExtractor::getKeyTimes();
+			//	//for (auto&& t : PRSset) {
+			//	//	keyTimes.insert(t);
+			//	//}
+			//	//PRSset.clear();
 
-				IKeyControl* keyControl = GetKeyControlInterfacePointer();
-				if (keyControl != nullptr) {
-					int numKeys = keyControl->GetNumKeys();
-					for (int i = 0; i < numKeys; i++) {
-						keyTimes.insert(m_Control->GetKeyTime(i));
-					}
-				}
+			//	IKeyControl* keyControl = GetKeyControlInterfacePointer();
+			//	if (keyControl != nullptr) {
+			//		int numKeys = keyControl->GetNumKeys();
+			//		for (int i = 0; i < numKeys; i++) {
+			//			keyTimes.insert(m_Control->GetKeyTime(i));
+			//		}
+			//	}
 
-				// Not treating Scale Transform this time. So I don't care about scale keyframes.
+			//	// Not treating Scale Transform this time. So I don't care about scale keyframes.
 
-				return keyTimes;
-			}
+			//	return keyTimes;
+			//}
 
 			std::set<TimeValue> XYZControllerDataExtractor::getKeyTimes()
 			{
@@ -792,22 +902,41 @@ namespace oxyde {
 			XYZControllerDataExtractor::XYZControllerDataExtractor(Control *theControl) : keyControllerDataExtractor(theControl)
 			{
 				if (!m_Control->IsLeaf()) {
-					DebugPrint(L"XYZControllerDataExtractor is NOT leaf\n");
-					m_XController = buildExtractor(m_Control->GetXController());
-					m_YController = buildExtractor(m_Control->GetYController());
-					m_ZController = buildExtractor(m_Control->GetZController());
+					//DebugPrint(L"XYZControllerDataExtractor is NOT leaf\n");
+					if (m_Control->GetXController() != nullptr) m_XController = buildExtractor(m_Control->GetXController());
+					if (m_Control->GetYController() != nullptr) m_YController = buildExtractor(m_Control->GetYController());
+					if (m_Control->GetZController() != nullptr) m_ZController = buildExtractor(m_Control->GetZController());
 				}
 				else {
-					DebugPrint(L"XYZControllerDataExtractor is leaf\n");
+					//DebugPrint(L"XYZControllerDataExtractor is leaf\n");
 				}
 			}
 
-			void positionControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
+			void positionControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement)
 			{
-				DebugPrint(L"This is a position Controller Extractor\n");
-				std::set<TimeValue> keyTimes = getKeyTimes();
-				DebugPrint(L"Total Keys for position controller: %i\n", keyTimes.size());
-				keyTimes.clear();
+				//DebugPrint(L"This is a position Controller Extractor\n");
+				//std::set<TimeValue> keyTimes = getKeyTimes();
+				//DebugPrint(L"Total Keys for position controller: %i\n", keyTimes.size());
+				//keyTimes.clear();
+
+
+
+				oxyde::exporter::XML::oxyPositionElementPtr thePositionElement = std::make_shared<oxyde::exporter::XML::oxyPositionElement>(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyPRSElement>(theAnimationElement));
+
+				for (int i = 0; i < m_Control->NumSubs(); i++) {
+					Animatable* controlAnim = m_Control->SubAnim(i);
+					Control* animAsControl = dynamic_cast<Control*>(controlAnim);
+					if (animAsControl != nullptr) {
+						auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(animAsControl, currentNode);
+						std::wstring subControlName(m_Control->SubAnimName(i));
+						for (std::wstring::size_type i = subControlName.find_first_of(' '); i != std::wstring::npos; i = subControlName.find_first_of(' ') ) {
+							subControlName.erase(i, 1);
+						}
+
+						oxyde::exporter::XML::oxyDocumentElementPtr subControlElement = std::make_shared<oxyde::exporter::XML::oxyDocumentElement>(thePositionElement, subControlName);
+						theControllerExtractor->exportController(subControlElement);
+					}
+				}
 			}
 
 			Class_ID positionControllerDataExtractor::getClass_ID()
@@ -829,12 +958,31 @@ namespace oxyde {
 
 			positionControllerDataExtractor::positionControllerDataExtractor(Control *theControl) : XYZControllerDataExtractor(theControl){}
 
-			void rotationControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
+			void rotationControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement)
 			{
-				DebugPrint(L"This is a ROTATION Controller Extractor\n");
-				std::set<TimeValue> keyTimes = getKeyTimes();
-				DebugPrint(L"Total Keys for ROTATION controller: %i\n", keyTimes.size());
-				keyTimes.clear();
+				//DebugPrint(L"This is a ROTATION Controller Extractor\n");
+				//std::set<TimeValue> keyTimes = getKeyTimes();
+				//DebugPrint(L"Total Keys for ROTATION controller: %i\n", keyTimes.size());
+				//keyTimes.clear();
+
+
+
+				oxyde::exporter::XML::oxyRotationElementPtr theRotationElement = std::make_shared<oxyde::exporter::XML::oxyRotationElement>(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyPRSElement>(theAnimationElement), getEulerAngleOrder());
+
+				for (int i = 0; i < m_Control->NumSubs(); i++) {
+					Animatable* controlAnim = m_Control->SubAnim(i);
+					Control* animAsControl = dynamic_cast<Control*>(controlAnim);
+					if (animAsControl != nullptr) {
+						auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(animAsControl, currentNode);
+						std::wstring subControlName(m_Control->SubAnimName(i));
+						for (std::wstring::size_type i = subControlName.find_first_of(' '); i != std::wstring::npos; i = subControlName.find_first_of(' ')) {
+							subControlName.erase(i, 1);
+						}
+
+						oxyde::exporter::XML::oxyDocumentElementPtr subControlElement = std::make_shared<oxyde::exporter::XML::oxyDocumentElement>(theRotationElement, subControlName); 
+						theControllerExtractor->exportController(subControlElement);
+					}
+				}
 			}
 
 			int rotationControllerDataExtractor::getEulerAngleOrder()
@@ -881,8 +1029,8 @@ namespace oxyde {
 				m[12] = localMatrix.GetRow(3).x;	m[13] = localMatrix.GetRow(3).y;	m[14] = localMatrix.GetRow(3).z;	m[15] = 1.;
 			}
 
-			void bipSlaveControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
-				DebugPrint(L"This is a bipSlave extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
+			void bipSlaveControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) {
+				//DebugPrint(L"This is a bipSlave extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 				std::set<TimeValue> keyTimes = getKeyTimes();
 				Matrix3 theMatrix;
 				Matrix3 localMatrix;
@@ -895,16 +1043,16 @@ namespace oxyde {
 					m_Control->GetValue(t, (void*)&theMatrix, FOREVER, CTRL_RELATIVE);
 					localMatrix = theMatrix * Inverse(ParentMatrix);
 
-					std::wstring outStr;
-					std::wostringstream outStream(outStr);
-					outStream << L"	Time: " << t << std::endl;
+					//std::wstring outStr;
+					//std::wostringstream outStream(outStr);
+					//outStream << L"	Time: " << t << std::endl;
 
-					outStream << L"		" << localMatrix.GetRow(0).x << "   " << localMatrix.GetRow(0).y << "   " << localMatrix.GetRow(0).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(1).x << "   " << localMatrix.GetRow(1).y << "   " << localMatrix.GetRow(1).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(2).x << "   " << localMatrix.GetRow(2).y << "   " << localMatrix.GetRow(2).z << std::endl;
-					outStream << L"		" << localMatrix.GetRow(3).x << "   " << localMatrix.GetRow(3).y << "   " << localMatrix.GetRow(3).z << std::endl;
+					//outStream << L"		" << localMatrix.GetRow(0).x << "   " << localMatrix.GetRow(0).y << "   " << localMatrix.GetRow(0).z << std::endl;
+					//outStream << L"		" << localMatrix.GetRow(1).x << "   " << localMatrix.GetRow(1).y << "   " << localMatrix.GetRow(1).z << std::endl;
+					//outStream << L"		" << localMatrix.GetRow(2).x << "   " << localMatrix.GetRow(2).y << "   " << localMatrix.GetRow(2).z << std::endl;
+					//outStream << L"		" << localMatrix.GetRow(3).x << "   " << localMatrix.GetRow(3).y << "   " << localMatrix.GetRow(3).z << std::endl;
 
-					outStream << std::endl;
+					//outStream << std::endl;
 
 					double m[16] = {
 						localMatrix.GetRow(0).x ,localMatrix.GetRow(0).y, localMatrix.GetRow(0).z, 0.,
@@ -919,25 +1067,25 @@ namespace oxyde {
 
 					oxyde::math::getDualQuaternionParametersFromMatrix(m, cosTheta, sinTheta, nx, ny, nz, slide, mx, my, mz);
 
-					outStream << "Normal = {" << nx << ", " << ny << ", " << nz << "}" << std::endl;
-					outStream << "Cos, Sin = {" << cosTheta << ", " << sinTheta << "}" << std::endl;
+					//outStream << "Normal = {" << nx << ", " << ny << ", " << nz << "}" << std::endl;
+					//outStream << "Cos, Sin = {" << cosTheta << ", " << sinTheta << "}" << std::endl;
 
-					outStream << "Slide = " << slide << std::endl;
-					outStream << "Axis vector m = {" << mx << ", " << my << ", " << mz << "}" << std::endl;
+					//outStream << "Slide = " << slide << std::endl;
+					//outStream << "Axis vector m = {" << mx << ", " << my << ", " << mz << "}" << std::endl;
 
-					std::wstring resultString(outStream.str());
-					DebugOutputString(resultString.c_str());
+					//std::wstring resultString(outStream.str());
+					//DebugOutputString(resultString.c_str());
 
 
 				}
 				keyTimes.clear();
-				buildTrack(theAnimationElement);
+				buildTrack(std::dynamic_pointer_cast<oxyde::exporter::XML::oxyAnimationElement>(theAnimationElement));
 				return;
 			}
 
 			void bipSlaveControllerDataExtractor::getDualQuatForTime(TimeValue t, float quat[])
 			{
-				oxyde::log::printLine();
+				//oxyde::log::printLine();
 
 				IBipMaster12* theBipMaster = NULL;
 				theBipMaster = (IBipMaster12*)m_Control->GetInterface(IBipMaster12::I_BIPMASTER12);
@@ -946,7 +1094,7 @@ namespace oxyde {
 
 					float rotQuat[8];
 					oxyde::DQ::pure_Real_quaternion(q.w, q.x, q.y, q.z, DUALQUAARRAY(rotQuat));
-					oxyde::log::printDualQuat(L"rotFromBip", rotQuat);
+					//oxyde::log::printDualQuat(L"rotFromBip", rotQuat);
 
 					Point3 pGlobal = theBipMaster->GetBipedPos(t, m_bipNode);
 					Matrix3 parentTM= m_bipNode->GetParentTM(t);
@@ -955,10 +1103,10 @@ namespace oxyde {
 
 					float transQuat[8];
 					oxyde::DQ::translation_quaternion(p.x, p.y, p.z, DUALQUAARRAY(transQuat));
-					oxyde::log::printDualQuat(L"transFromBip", transQuat);
+					//oxyde::log::printDualQuat(L"transFromBip", transQuat);
 
 					oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(transQuat), DUALQUAARRAY(rotQuat), DUALQUAARRAY(quat));
-					oxyde::log::printDualQuat(L"finalFromBip", quat);
+					//oxyde::log::printDualQuat(L"finalFromBip", quat);
 				}
 				else {
 					double m[16];
@@ -985,14 +1133,14 @@ namespace oxyde {
 				return GetKeyControlInterface(m_Control);
 			}
 
-			void bipBodyControllerDataExtractor::exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) {
-				DebugPrint(L"This is a bipBody extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
+			void bipBodyControllerDataExtractor::exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) {
+				//DebugPrint(L"This is a bipBody extractor... ClassID: 0x%lX : 0x%lX\n", m_Control->ClassID().PartA(), m_Control->ClassID().PartB());
 
 				if (!m_Control->IsLeaf()) {
-					DebugPrint(L"bipBodyControllerDataExtractor is NOT leaf\n");
+					//DebugPrint(L"bipBodyControllerDataExtractor is NOT leaf\n");
 				}
 				else {
-					DebugPrint(L"bipBodyControllerDataExtractor is leaf\n");
+					//DebugPrint(L"bipBodyControllerDataExtractor is leaf\n");
 				}
 
 				if (m_bipSlaveController)m_bipSlaveController->exportController(theAnimationElement);

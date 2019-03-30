@@ -54,14 +54,14 @@ namespace oxyde {
 			eVec2[0] = (eVecPointers[(i + 1) % 3])[0]; eVec2[1] = (eVecPointers[(i + 1) % 3])[1]; eVec2[2] = (eVecPointers[(i + 1) % 3])[2];
 			eVec3[0] = (eVecPointers[(i + 2) % 3])[0]; eVec3[1] = (eVecPointers[(i + 2) % 3])[1]; eVec3[2] = (eVecPointers[(i + 2) % 3])[2];
 
-			oxyde::log::printLine();
-			oxyde::log::printMatrix(L"OriginalMatrix", m);
-			oxyde::log::printNamedParameter(L"eVal1", eVal1);
-			oxyde::log::printNamedParameter(L"eVal2", eVal2);
-			oxyde::log::printNamedParameter(L"eVal3", eVal3);
-			oxyde::log::printComplexVector(L"eVec1", eVec1[0], eVec1[1], eVec1[2]);
-			oxyde::log::printComplexVector(L"eVec2", eVec2[0], eVec2[1], eVec2[2]);
-			oxyde::log::printComplexVector(L"eVec3", eVec3[0], eVec3[1], eVec3[2]);
+			//oxyde::log::printLine();
+			//oxyde::log::printMatrix(L"OriginalMatrix", m);
+			//oxyde::log::printNamedParameter(L"eVal1", eVal1);
+			//oxyde::log::printNamedParameter(L"eVal2", eVal2);
+			//oxyde::log::printNamedParameter(L"eVal3", eVal3);
+			//oxyde::log::printComplexVector(L"eVec1", eVec1[0], eVec1[1], eVec1[2]);
+			//oxyde::log::printComplexVector(L"eVec2", eVec2[0], eVec2[1], eVec2[2]);
+			//oxyde::log::printComplexVector(L"eVec3", eVec3[0], eVec3[1], eVec3[2]);
 
 			//cout << "eVal1 = " << eVal1 << endl;
 			//cout << "eVal2 = " << eVal2 << endl;
@@ -77,7 +77,7 @@ namespace oxyde {
 			ny = std::real(eVec1[1]);
 			nz = std::real(eVec1[2]);
 
-			oxyde::log::printPointInSpace(L"{nx, ny, nz}", nx, ny, nz);
+			//oxyde::log::printPointInSpace(L"{nx, ny, nz}", nx, ny, nz);
 
 			cosTheta = (-1 + m[0] + m[5] + m[10]) / 2.;
 			//oxyde::math::complex sinTheta = ((eVal2 - eVal3)*(eVec1[2] * (eVec2[1] * eVec3[0] - eVec2[0] * eVec3[1]) + eVec1[1] * (-(eVec2[2] * eVec3[0]) + eVec2[0] * eVec3[2]) + eVec1[0] * (eVec2[2] * eVec3[1] - eVec2[1] * eVec3[2]))) /
@@ -105,7 +105,7 @@ namespace oxyde {
 
 				if (std::abs(sinTheta) > 0.0001) {
 
-					oxyde::log::printText(L"Route A");
+					//oxyde::log::printText(L"Route A");
 
 					slide = std::real(eVec1[0] * m[12] + eVec1[1] * m[13] + eVec1[2] * m[14]);
 
@@ -117,14 +117,14 @@ namespace oxyde {
 				}
 				else {
 
-					oxyde::log::printText(L"Route B");
+					//oxyde::log::printText(L"Route B");
 					mx = 0.0;	my = 0.0;	mz = 0.0;
 
 					slide = 2 * std::sqrt(std::pow(m[12], 2) / 4. + std::pow(m[13], 2) / 4. + std::pow(m[14], 2) / 4.);
 
 					if (std::abs(slide) > 0.0001) {
 
-						oxyde::log::printText(L"Route B1");
+						//oxyde::log::printText(L"Route B1");
 
 						nx = m[12] / slide;
 						ny = m[13] / slide;
@@ -132,7 +132,7 @@ namespace oxyde {
 					}
 					else {
 
-						oxyde::log::printText(L"Route B2");
+						//oxyde::log::printText(L"Route B2");
 
 						nx = 1.0;
 						ny = 0.0;

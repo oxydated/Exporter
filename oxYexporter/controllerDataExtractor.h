@@ -25,10 +25,12 @@ namespace oxyde {
 			class controllerDataExtractor {
 			public:
 				//virtual void exportController(IXMLDOMElement* theAnimationElement) = 0;
-				virtual void exportController(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement) = 0;
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) = 0;
 
 				static controllerDataExtractor_ptr buildExtractor(Control* theControl);
 				static controllerDataExtractor_ptr buildExtractorAndSetCurrentNode(Control* theControl, INode* theNode);
+
+				virtual bool isPerFrame();
 
 			protected:
 				controllerDataExtractor() = default;
@@ -37,7 +39,10 @@ namespace oxyde {
 				};
 				static void registerFactory(controllerDataExtractor_ptr(*theFactory)(Control*), Class_ID theClassID);
 
+				static void registerFactory(controllerDataExtractor_ptr(*theFactory)(Control *), Class_ID theClassID, bool isPerFrame);
+
 				static std::map<Class_ID, controllerDataExtractor_ptr(*)(Control*)> factoriesMap;
+				static std::vector<Class_ID> perFrameFactories;
 				static INode* currentNode;
 
 				Control* m_Control;

@@ -106,11 +106,11 @@ namespace oxyde {
 
 		void rotationEigenValuesAndVectors(const double m[], complex& eVal1, complex& eVal2, complex& eVal3, complex eVec1[], complex eVec2[], complex eVec3[]) {
 
-			oxyde::log::printMatrix(L"m", m);
+			//oxyde::log::printMatrix(L"m", m);
 
-			std::wstring outStr;
-			std::wstring resultString;
-			std::wostringstream outStream(outStr);
+			//std::wstring outStr;
+			//std::wstring resultString;
+			//std::wostringstream outStream(outStr);
 
 			cubicRoots(
 				-1,
@@ -160,20 +160,20 @@ namespace oxyde {
 				p[1] = m[1];			p[4] = -eigV + m[5];	p[7] = m[9];
 				p[2] = m[2];			p[5] = m[6];			p[8] = -eigV + m[10];
 
-				oxyde::log::print3x3ComplexMatrix(L"p", p.data());
+				//oxyde::log::print3x3ComplexMatrix(L"p", p.data());
 
 				oxyde::math::solveLinearSystem(3, p.data(), v.data(), mo.data(), vo.data());
 
-				oxyde::log::printNamedParameter(L"eigV", eigV);
-				oxyde::log::printComplexVector(L"vo", vo[0], vo[1], vo[2]);
-				oxyde::log::print3x3ComplexMatrix(L"mo", mo.data());
+				//oxyde::log::printNamedParameter(L"eigV", eigV);
+				//oxyde::log::printComplexVector(L"vo", vo[0], vo[1], vo[2]);
+				//oxyde::log::print3x3ComplexMatrix(L"mo", mo.data());
 
 				//outStream.str(outStr);
 				//outStream	<< std::fixed 
 				//			<< L"{" << std::real(vo[0]) << L"+" << std::imag(vo[0]) << L" I ,"
 				//			<< std::real(vo[1]) << L"+" << std::imag(vo[1]) << L" I ,"
 				//			<< std::real(vo[2]) << L"+" << std::imag(vo[2]) << L" I }";
-				//oxyde::log::printNamedParameter(L"vo", outStream.str());
+				////oxyde::log::printNamedParameter(L"vo", outStream.str());
 
 				complex theNorm = std::sqrt(std::pow(std::abs(vo[0]), 2) + std::pow(std::abs(vo[1]), 2) + std::pow(std::abs(vo[2]), 2));
 
@@ -186,13 +186,13 @@ namespace oxyde {
 				//	<< L"{" << std::real(eigenvectors[i][0]) << L"+" << std::imag(eigenvectors[i][0]) << L" I ,"
 				//	<< std::real(eigenvectors[i][1]) << L"+" << std::imag(eigenvectors[i][1]) << L" I ,"
 				//	<< std::real(eigenvectors[i][2]) << L"+" << std::imag(eigenvectors[i][2]) << L" I }";
-				//oxyde::log::printNamedParameter(L"eigenvectorsi", outStream.str());
+				////oxyde::log::printNamedParameter(L"eigenvectorsi", outStream.str());
 
 				//outStream.str(outStr);
 				//outStream << std::fixed
 				//	<< std::real(theNorm) << L"+" << std::imag(theNorm);
 
-				oxyde::log::printNamedParameter(L"theNorm", theNorm);
+				//oxyde::log::printNamedParameter(L"theNorm", theNorm);
 			}
 
 			if (theRepeated != repeatedEigenvalues::None) {
@@ -210,9 +210,9 @@ namespace oxyde {
 					i = 1;	j = 2;	k = 0;
 				}	
 
-				oxyde::log::printNamedParameter(L"i", i);
-				oxyde::log::printNamedParameter(L"j", j);
-				oxyde::log::printNamedParameter(L"k", k);
+				//oxyde::log::printNamedParameter(L"i", i);
+				//oxyde::log::printNamedParameter(L"j", j);
+				//oxyde::log::printNamedParameter(L"k", k);
 
 				eigenvectors[k][0] = -(eigenvectors[i][2] * eigenvectors[j][1]) + eigenvectors[i][1] * eigenvectors[j][2];
 				eigenvectors[k][1] = eigenvectors[i][2] * eigenvectors[j][0] - eigenvectors[i][0] * eigenvectors[j][2];
@@ -223,49 +223,46 @@ namespace oxyde {
 			eVec2[0] = eigenvectors[1][0];		eVec2[1] = eigenvectors[1][1];		eVec2[2] = eigenvectors[1][2];
 			eVec3[0] = eigenvectors[2][0];		eVec3[1] = eigenvectors[2][1];		eVec3[2] = eigenvectors[2][2];
 
-			outStream.str(outStr);	
-			outStream << std::fixed;
-			outStream << L"Solve[{" << -1 << L", ";
-			outStream << m[0] + m[5] + m[10] << L", ";
-			outStream << m[1] * m[4] - m[0] * m[5] + m[2] * m[8] + m[6] * m[9] - m[0] * m[10] - m[5] * m[10] << L", ";
-			outStream <<-(m[2] * m[5] * m[8]) + m[1] * m[6] * m[8] + m[2] * m[4] * m[9] - m[0] * m[6] * m[9] - m[1] * m[4] * m[10] + m[0] * m[5] * m[10] << L"}";
-			outStream << L".{x^3, x^2, x, 1}==0, x]";
-			outStream << std::endl;
+			//outStream.str(outStr);	
+			//outStream << std::fixed;
+			//outStream << L"Solve[{" << -1 << L", ";
+			//outStream << m[0] + m[5] + m[10] << L", ";
+			//outStream << m[1] * m[4] - m[0] * m[5] + m[2] * m[8] + m[6] * m[9] - m[0] * m[10] - m[5] * m[10] << L", ";
+			//outStream <<-(m[2] * m[5] * m[8]) + m[1] * m[6] * m[8] + m[2] * m[4] * m[9] - m[0] * m[6] * m[9] - m[1] * m[4] * m[10] + m[0] * m[5] * m[10] << L"}";
+			//outStream << L".{x^3, x^2, x, 1}==0, x]";
+			//outStream << std::endl;
 
-			oxyde::log::printText(outStream.str());
+			//oxyde::log::printText(outStream.str());
 
-			outStream.str(outStr);
-			outStream << std::fixed << std::real(eVal1) << L"+" << std::imag(eVal1) << L" I ";
-			oxyde::log::printNamedParameter(L"eVal1", outStream.str());
-			outStream.str(outStr);
-			outStream << std::fixed << std::real(eVal2) << L"+" << std::imag(eVal2) << L" I ";
-			oxyde::log::printNamedParameter(L"eVal2", outStream.str());
-			outStream.str(outStr);
-			outStream << std::fixed << std::real(eVal3) << L"+" << std::imag(eVal3) << L" I ";
-			oxyde::log::printNamedParameter(L"eVal3", outStream.str());
+			//outStream.str(outStr);
+			//outStream << std::fixed << std::real(eVal1) << L"+" << std::imag(eVal1) << L" I ";
+			//outStream.str(outStr);
+			//outStream << std::fixed << std::real(eVal2) << L"+" << std::imag(eVal2) << L" I ";
+			//outStream.str(outStr);
+			//outStream << std::fixed << std::real(eVal3) << L"+" << std::imag(eVal3) << L" I ";
 
 			std::array<float, 16> mFloat = { m[0],m[1],m[2],m[3],m[4],m[5],m[6],m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15] };
-			oxyde::log::printMatrix(L"m", mFloat.data());
-			oxyde::log::printText(L"Eigenvalues[m[[1;;3, 1;;3]]]");
+			//oxyde::log::printMatrix(L"m", mFloat.data());
+			//oxyde::log::printText(L"Eigenvalues[m[[1;;3, 1;;3]]]");
 
 
-			outStream.str(outStr);
-			outStream << std::fixed << L"{" << std::real(eVec1[0]) << L"+" << std::imag(eVec1[0]) << L" I ,"
-				<< std::real(eVec1[1]) << L"+" << std::imag(eVec1[1]) << L" I ,"
-				<< std::real(eVec1[2]) << L"+" << std::imag(eVec1[2]) << L" I }";
-			oxyde::log::printNamedParameter(L"eVec1", outStream.str());
-			outStream.str(outStr);
-			outStream << std::fixed << L"{" << std::real(eVec2[0]) << L"+" << std::imag(eVec2[0]) << L" I ,"
-				<< std::real(eVec2[1]) << L"+" << std::imag(eVec2[1]) << L" I ,"
-				<< std::real(eVec2[2]) << L"+" << std::imag(eVec2[2]) << L" I }";
-			oxyde::log::printNamedParameter(L"eVec2", outStream.str());
-			outStream.str(outStr);
-			outStream << std::fixed << L"{" << std::real(eVec3[0]) << L"+" << std::imag(eVec3[0]) << L" I ,"
-				<< std::real(eVec3[1]) << L"+" << std::imag(eVec3[1]) << L" I ,"
-				<< std::real(eVec3[2]) << L"+" << std::imag(eVec3[2]) << L" I }";
-			oxyde::log::printNamedParameter(L"eVec3", outStream.str());
+			//outStream.str(outStr);
+			//outStream << std::fixed << L"{" << std::real(eVec1[0]) << L"+" << std::imag(eVec1[0]) << L" I ,"
+			//	<< std::real(eVec1[1]) << L"+" << std::imag(eVec1[1]) << L" I ,"
+			//	<< std::real(eVec1[2]) << L"+" << std::imag(eVec1[2]) << L" I }";
+			//oxyde::log::printNamedParameter(L"eVec1", outStream.str());
+			//outStream.str(outStr);
+			//outStream << std::fixed << L"{" << std::real(eVec2[0]) << L"+" << std::imag(eVec2[0]) << L" I ,"
+			//	<< std::real(eVec2[1]) << L"+" << std::imag(eVec2[1]) << L" I ,"
+			//	<< std::real(eVec2[2]) << L"+" << std::imag(eVec2[2]) << L" I }";
+			//oxyde::log::printNamedParameter(L"eVec2", outStream.str());
+			//outStream.str(outStr);
+			//outStream << std::fixed << L"{" << std::real(eVec3[0]) << L"+" << std::imag(eVec3[0]) << L" I ,"
+			//	<< std::real(eVec3[1]) << L"+" << std::imag(eVec3[1]) << L" I ,"
+			//	<< std::real(eVec3[2]) << L"+" << std::imag(eVec3[2]) << L" I }";
+			//oxyde::log::printNamedParameter(L"eVec3", outStream.str());
 
-			oxyde::log::printText(L"Eigenvectors[m[[1;;3, 1;;3]]]");
+			//oxyde::log::printText(L"Eigenvectors[m[[1;;3, 1;;3]]]");
 		}
 
 		double getAngleFromCosAndSin(double cosTheta, double sinTheta) {
