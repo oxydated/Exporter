@@ -16,7 +16,7 @@ namespace oxyde {
 			class oxyPositionElement : public oxyDocumentElement {
 			public:
 				oxyPositionElement(oxyDocumentPtr theInputDocument, std::wstring theElementName) = delete;
-				oxyPositionElement(oxyPRSElementPtr  theParent) :oxyDocumentElement(theParent, L"Position") {}
+				oxyPositionElement(oxyDocumentElementPtr  theParent) :oxyDocumentElement(theParent, L"Position") {}
 			};
 
 			using oxyPositionElementPtr = std::shared_ptr<oxyPositionElement>;

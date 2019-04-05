@@ -10,6 +10,7 @@
 #include <memory>
 #include "processSkin.h"
 #include "skinDataExtraction.h"
+#include "debugLog.h"
 
 using namespace std;
 
@@ -41,8 +42,22 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 
 		bool boneTest = false, skinTest = false, derivedTest = false;
 		if (!topNode->IsRootNode()) {
-			
+
 			oxyde::exporter::skin::skinObjectsList::addSkinObjectToList(topNode);
+
+			Object* theTopNodeObject = topNode->GetObjectRef();
+			Class_ID theTopNodeObjectClassID = theTopNodeObject->ClassID();
+			SClass_ID theTopNodeObjectSuperClassID = theTopNodeObject->SuperClassID();
+			MSTR objectClassName;
+			theTopNodeObject->GetClassName(objectClassName);
+
+			oxyde::log::printText(std::wstring(L"Class Name: ") + std::wstring(objectClassName));
+
+			if (theTopNodeObject->CanConvertToType(Class_ID(LOOKAT_CAM_CLASS_ID, 0))) {
+				GenCamera* theLookAtCamera = reinterpret_cast<GenCamera*>(theTopNodeObject->ConvertToType(0, Class_ID(LOOKAT_CAM_CLASS_ID, 0)));
+
+				//oxyde::log::printText(std::wstring(L"Class Name: ") + std::wstring(objectClassName));
+			}
 		}
 
 		getControllerInformation(topNode, newParent);

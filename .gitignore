@@ -6,3 +6,7 @@ oxYexporter/oxYexporter.vcxproj
 oxYexporter/oxYexporter.vcxproj.filters
 *.db
 *.opendb
+*.lastbuildstate
+*.tlog
+*.idb
+/Exporter_PRS_controller

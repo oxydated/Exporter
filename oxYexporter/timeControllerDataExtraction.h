@@ -124,6 +124,18 @@ namespace oxyde {
 				controllerDataExtractor_ptr m_bipSlaveController;
 			};
 
+			class lookAtcontrollerDataExtractor : public controllerDataExtractor {
+			public:
+				virtual void exportController(oxyde::exporter::XML::oxyDocumentElementPtr theAnimationElement) override;
+
+				static Class_ID getClass_ID();
+				static void registerMe();
+				static controllerDataExtractor_ptr buildlookAtcontrollerDataExtractor(Control* theControl);
+
+			protected:
+				explicit lookAtcontrollerDataExtractor(Control *theControl) : controllerDataExtractor(theControl) {}
+			};
+
 
 		}
 	}
