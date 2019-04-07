@@ -84,6 +84,7 @@ namespace oxyde {
 								hr = outDoc->transformNodeToObject(xslDoc, finalDoc.GetInterfacePtr());
 								if (hr == S_OK) {
 									finalDoc->save(_variant_t(name.data()));
+									//xmlDocumentPointer->save(_variant_t(name.data()));
 								}
 							}
 						}
@@ -144,7 +145,7 @@ namespace oxyde {
 			MSXML2::IXMLDOMElementPtr oxyDocumentElement::addElement(std::wstring elementName, oxyDocumentPtr theDocument)
 			{
 				MSXML2::IXMLDOMElementPtr newElement = theDocument->getXMLDocument()->createElement(_bstr_t(elementName.data()));
-				theDocument->getRoot()->appendChild(newElement);
+				MSXML2::IXMLDOMElementPtr appendedElement = theDocument->getRoot()->appendChild(newElement);
 				return newElement;
 			}
 
@@ -158,7 +159,7 @@ namespace oxyde {
 			oxyDocumentElement::oxyDocumentElement(oxyDocumentPtr theInputDocument, std::wstring theElementName) :elementName(theElementName), theDocument(theInputDocument)
 			{
 				xmlElementPointer = addElement(elementName, theDocument);
-				theDocument = theInputDocument; 
+				//theDocument = theInputDocument; 
 				buildListOfAttributes();
 				setElementAttributes();
 			}

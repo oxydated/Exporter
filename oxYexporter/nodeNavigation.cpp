@@ -10,6 +10,7 @@
 #include <memory>
 #include "processSkin.h"
 #include "skinDataExtraction.h"
+#include "processCamera.h"
 #include "debugLog.h"
 
 using namespace std;
@@ -17,6 +18,7 @@ using namespace std;
 void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentPtr theDocument) {
 	nodeStack theStack;
 	static int nodeObjectID = 0;
+	std::vector<INodePtr> cameraNodes;
 
 	//getRootElement();
 	//getObjectListElement();
@@ -26,6 +28,8 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 	oxyde::exporter::skin::skinObjectsList::initializeSkinObjectsList(rootNode);
 
 	oxyde::exporter::XML::oxyNodeKeeperPtr theSceneElement = std::make_shared<oxyde::exporter::XML::oxySceneElement>(theDocument);
+
+	//oxyde::exporter::XML::oxyCamerasInSceneElementPtr camerasInSceneElement = std::make_shared<oxyde::exporter::XML::oxyCamerasInSceneElement>(theDocument);
 
 	theStack.push(nodePair(theSceneElement, rootNode));
 
@@ -55,7 +59,7 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 
 			if (theTopNodeObject->CanConvertToType(Class_ID(LOOKAT_CAM_CLASS_ID, 0))) {
 				GenCamera* theLookAtCamera = reinterpret_cast<GenCamera*>(theTopNodeObject->ConvertToType(0, Class_ID(LOOKAT_CAM_CLASS_ID, 0)));
-
+				cameraNodes.push_back(topNode);
 				//oxyde::log::printText(std::wstring(L"Class Name: ") + std::wstring(objectClassName));
 			}
 		}
@@ -70,6 +74,8 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 
 		nodeObjectID++;
 	}
+
+	oxyde::exporter::camera::exportAllCameras(theDocument, cameraNodes);
 
 	oxyde::exporter::skin::skinObjectsList::buildSkinObjectsInList(theDocument);
 }
