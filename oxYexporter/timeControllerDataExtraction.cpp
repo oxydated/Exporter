@@ -50,9 +50,9 @@ namespace oxyde {
 				if (theKeyControl != NULL) {
 					int numKeys = theKeyControl->GetNumKeys();
 
-					oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, numKeys);
-
 					if (numKeys > 0) {
+						oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, numKeys - 1);
+
 						IKey* theKey = (IKey*)(new char[theKeyControl->GetKeySize()]);
 						bool firstFrame = true;
 
@@ -130,6 +130,9 @@ namespace oxyde {
 
 							firstFrame = false;
 						}
+					}
+					else {
+						oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, numKeys);
 					}
 				}
 
