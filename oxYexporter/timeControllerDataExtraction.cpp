@@ -132,7 +132,23 @@ namespace oxyde {
 						}
 					}
 					else {
-						oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, numKeys);
+
+						oxyde::exporter::XML::oxyBezierTrackElementPtr theBezierTrackElement = std::make_shared<oxyde::exporter::XML::oxyBezierTrackElement>(theAnimationElement, 1);
+
+						float startTime = GetAnimStart();
+						float startValue = 0.;
+						m_Control->GetValue(startTime, &startValue, FOREVER);
+
+						float endTime =	GetAnimEnd();
+						//float endValue = 0.;
+						//m_Control->GetValue(endTime, &endValue, FOREVER);
+
+						float B0 = startValue;
+						float B1 = 0.;
+						float B2 = 0.;
+						float B3 = 0.;
+
+						oxyde::exporter::XML::oxyBezierKeyElementPtr theBezierKeyElement = std::make_shared<oxyde::exporter::XML::oxyBezierKeyElement>(theBezierTrackElement, startTime, endTime, B3, B2, B1, B0);
 					}
 				}
 
