@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <max.h>
 #include "xmlDocument.h"
 
 namespace oxyde {
@@ -80,6 +81,7 @@ namespace oxyde {
 			class oxySkinElement : public oxyDocumentElement, std::enable_shared_from_this<oxySkinElement> {
 			public:
 				static oxySkinElementPtr createSkinElement(oxyObjectListPtr theObjectList, std::wstring inputSkinNodeName, int inputMesh,
+					INodePtr theSkinNode,
 					int inputnumBones,
 					int inputnumVertices,
 					float inr0c0, float inr0c1, float inr0c2,

@@ -16,10 +16,49 @@
 #include "skinDataExtraction.h"
 #include "xmlDocumentPRS.h"
 #include "xmlDocumentLookAt.h"
+#include "dualQuaternionEulerAngles.h"
+//#include "dualQuaternionMath.h"
+
+namespace {
+
+	int getIntAttributeFromElement(const MSXML2::IXMLDOMElementPtr &theElement, _bstr_t attribName)
+	{
+		_variant_t&& intVariant = theElement->getAttribute(attribName);
+		intVariant.ChangeType(VT_I4);
+		return intVariant.intVal;
+	}
+
+	float getFloatAttributeFromElement(const MSXML2::IXMLDOMElementPtr &theElement, _bstr_t attribName)
+	{
+		_variant_t&& intVariant = theElement->getAttribute(attribName);
+		intVariant.ChangeType(VT_BSTR);
+		return std::stof(std::wstring(intVariant.bstrVal));
+	}
+
+	// <BezierKey startTime="0" endTime="16000" coeff_B3="0.000000" coeff_B2="0.000000" coeff_B1="0.000000" coeff_B0="-0.000000"/>
+
+	float getValueFromBezierFloatKeyframeElementForTime(const MSXML2::IXMLDOMElementPtr &theElement, long currentTime) {
+		int startTime = getIntAttributeFromElement(theElement, L"startTime");
+		int endTime = getIntAttributeFromElement(theElement, L"endTime");
+
+		float timeNotClamped = float(currentTime - long(startTime)) / float(endTime - startTime);
+		float t = timeNotClamped < 1.0 ? (0.0 <= timeNotClamped ? timeNotClamped : 0.0) : 1.0;
+
+		float coeff_B3 = getFloatAttributeFromElement(theElement, L"coeff_B3");
+		float coeff_B2 = getFloatAttributeFromElement(theElement, L"coeff_B2");
+		float coeff_B1 = getFloatAttributeFromElement(theElement, L"coeff_B1");
+		float coeff_B0 = getFloatAttributeFromElement(theElement, L"coeff_B0");
+
+		return coeff_B0 + t*(coeff_B1 + t*(coeff_B2 + coeff_B3*t));
+	}
+
+}
 
 namespace oxyde {
 	namespace exporter {
 		namespace controller {
+
+			using dualQuat = std::array<double, 8>;
 
 			Class_ID defaultControllerDataExtractor::getClass_ID() {
 				return Class_ID();
@@ -176,7 +215,6 @@ namespace oxyde {
 
 			void matrixControllerDataExtractor::buildTrack(oxyde::exporter::XML::oxyAnimationElementPtr theAnimationElement)
 			{
-				using dualQuat = std::array<double, 8>;
 				using dualQuatKey = std::pair<TimeValue, dualQuat>;
 
 				std::set<TimeValue> keyTimes = getKeyTimes();
@@ -595,12 +633,14 @@ namespace oxyde {
 						//);
 					}
 
+					// To check for the need to invert the sign of the Skin Pose Dual Quaternion
 					if (pair.first.first == 0) {
 						//float step = 0.0;
 						//if (pair.second.first > 0) {
 						//	step = 0.001 / double(pair.second.first);
 						//}
-						float step = (pair.second.first > 0) ? 0.001 / double(pair.second.first) : 0.0;
+
+						float step = (pair.second.first > 0) ? (1. / float(pair.second.first - pair.first.first)) : 0.0;
 
 						float interpQuat[8];
 						oxyde::DQ::dual_Versor(
@@ -713,7 +753,65 @@ namespace oxyde {
 					}
 				}
 
+				// Extract bone transformation from oxyPRSElement
+				// All bezierFloat tracks will have at least one keyframe
 
+				MSXML2::IXMLDOMElementPtr XPosElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Position/XPosition/BezierTrack/BezierKey[last()]"));
+				MSXML2::IXMLDOMElementPtr YPosElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Position/YPosition/BezierTrack/BezierKey[last()]"));
+				MSXML2::IXMLDOMElementPtr ZPosElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Position/ZPosition/BezierTrack/BezierKey[last()]"));
+
+				MSXML2::IXMLDOMElementPtr RotationElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Rotation"));
+
+				MSXML2::IXMLDOMElementPtr XRotElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Rotation/XRotation/BezierTrack/BezierKey[last()]"));
+				MSXML2::IXMLDOMElementPtr YRotElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Rotation/YRotation/BezierTrack/BezierKey[last()]"));
+				MSXML2::IXMLDOMElementPtr ZRotElement = MSXML2::IXMLDOMElementPtr(thePRSElement->getXMLDOMElement()->selectSingleNode(L"./Rotation/ZRotation/BezierTrack/BezierKey[last()]"));
+
+				long currentTime = 6720;
+
+				// Get Position X
+				float PosX = getValueFromBezierFloatKeyframeElementForTime(XPosElement, currentTime);
+
+				// Get Position Y
+				float PosY = getValueFromBezierFloatKeyframeElementForTime(YPosElement, currentTime);
+
+				// Get Position Z
+				float PosZ = getValueFromBezierFloatKeyframeElementForTime(ZPosElement, currentTime);
+
+				// Get Euler Angles order
+				int EulerOrder = getIntAttributeFromElement(RotationElement, L"eulerOrder");
+
+				// Get Rotation X
+				float RotX = getValueFromBezierFloatKeyframeElementForTime(XRotElement, currentTime);
+
+				// Get Rotation Y
+				float RotY = getValueFromBezierFloatKeyframeElementForTime(YRotElement, currentTime);
+
+				// Get Rotation Z
+				float RotZ = getValueFromBezierFloatKeyframeElementForTime(ZRotElement, currentTime);
+
+				// build bone dual quaternion at time
+				oxyde::DQ::dualQuat localTransform;
+
+				oxyde::DQ::quatFromEulerFunc quatFromEuler = oxyde::DQ::quatFromEulerFuncByOrder(oxyde::DQ::eulerOrder(EulerOrder));
+
+				// Calculate Rotation
+				oxyde::DQ::dualQuat rotationQuat;
+				quatFromEuler(RotX, RotY, RotZ, DUALQUAARRAY(rotationQuat));
+
+				// Calculate Position
+				oxyde::DQ::dualQuat translationQuat;
+				oxyde::DQ::translation_quaternion(PosX, PosY, PosZ, DUALQUAARRAY(translationQuat));
+
+				// Multiply Rotation by Position to find local transformation
+				// MultiQuat[oxyTranslationQuat, oxyQuat]
+				oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(translationQuat),
+					DUALQUAARRAY(rotationQuat),
+					DUALQUAARRAY(localTransform));
+
+
+				// To keep track of local transformation
+				dualQuat localQuatDouble = { DUALQUAARRAY(localTransform) };
+				oxyde::exporter::skin::skinPoseCorrector::addLocalTransform(currentNode, localQuatDouble);
 
 				//	//DebugPrint(L"This is a PRS Controller Extractor test\n");
 				//	std::set<TimeValue> keyTimes = getKeyTimes();
@@ -1245,7 +1343,7 @@ namespace {
 			oxyde::exporter::controller::rotationControllerDataExtractor::registerMe();
 			oxyde::exporter::controller::bipSlaveControllerDataExtractor::registerMe();
 			oxyde::exporter::controller::bipBodyControllerDataExtractor::registerMe();
-			oxyde::exporter::controller::lookAtcontrollerDataExtractor::registerMe();
+			//oxyde::exporter::controller::lookAtcontrollerDataExtractor::registerMe();
 		}
 	};
 

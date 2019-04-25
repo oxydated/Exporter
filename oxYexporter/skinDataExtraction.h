@@ -8,6 +8,7 @@
 #include <array>
 #include "max.h"
 #include "xmlDocument.h"
+#include "auxiliaryLogger.h"
 
 namespace oxyde {
 	namespace exporter {
@@ -30,9 +31,12 @@ namespace oxyde {
 			public:
 				static void addLocalTransform(INodePtr boneNode, dualQuat localTransform) {
 					nodeToLocalTransformDict[boneNode] = localTransform;
+
+					oxyde::DQ::dualQuat localQuatfloat = { DUALQUAARRAY(localTransform) };
+					oxyde::exporter::log::insertLocalTransformForNodes(boneNode->GetName(), localQuatfloat);
 				}
 
-				skinPoseCorrector(ISkin* theSkinInterface);
+				skinPoseCorrector(ISkin* theSkinInterface, INodePtr theSkinNode);
 
 				matrix4x4 getSkinPoseMatrixForNode(INodePtr boneNode) {
 					return skinPoseMatricesDict[boneNode];

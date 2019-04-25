@@ -7,6 +7,7 @@
 #include "debugLog.h"
 #include "dualQuaternionMath.h"
 #include "skinDataExtraction.h"
+#include "auxiliaryLogger.h"
 
 bool isThereASkinModifier(IDerivedObject* theDerivedObj){
 	bool thereIsASkinModifier = false;
@@ -76,6 +77,7 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	//insertObjectTMforSkin(skinNode, theObjectTM);	
 
 	oxyde::exporter::XML::oxySkinElementPtr theSkinElement = oxyde::exporter::XML::oxySkinElement::createSkinElement(theObjectList, skinNodeName, meshID,
+		theNode,
 		numBones,
 		numVertices,
 		theObjectTM.GetRow(0).x, theObjectTM.GetRow(0).y, theObjectTM.GetRow(0).z,
@@ -83,7 +85,14 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 		theObjectTM.GetRow(2).x, theObjectTM.GetRow(2).y, theObjectTM.GetRow(2).z,
 		theObjectTM.GetRow(3).x, theObjectTM.GetRow(3).y, theObjectTM.GetRow(3).z);
 
-	oxyde::exporter::skin::skinPoseCorrector theSkinPoseCorrector(theSkinInterface);
+	oxyde::exporter::skin::skinPoseCorrector theSkinPoseCorrector(theSkinInterface, theNode);
+
+	//oxyde::exporter::log::startBuildingBonesForSkin();
+	//oxyde::exporter::log::startSkinPosesForBones();
+
+	//std::set<int> toInvert{ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,23,26,27,28,29,31,36,37,39,42,50,52,58,67,90,98,149 };
+	std::set<int> toInvert{ 0, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 23, 26, 27, 28, 29, 31, 36, 37, 39, 42, 50, 52, 58, 67, 90, 98, 149 };
+	//std::set<int> toInvert{1, 6, 8};
 
 	for (int i = 0; i < numBones; i++) {
 		INode* theBoneNode = theSkinInterface->GetBone(i);
@@ -99,6 +108,9 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 			oxyde::log::printLine();
 
 			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUAARRAY(q));
+			if (toInvert.find(i) != toInvert.end()) {
+				q[0] = -q[0]; q[1] = -q[1]; q[2] = -q[2]; q[3] = -q[3]; q[4] = -q[4]; q[5] = -q[5]; q[6] = -q[6]; q[7] = -q[7];
+			}
 
 			theSkinElement->addBone((_TCHAR*)theBoneNode->GetName(), i,
 				theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z,
@@ -107,12 +119,18 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 				theMatrix.GetRow(3).x, theMatrix.GetRow(3).y, theMatrix.GetRow(3).z,
 				DUALQUAARRAY(q)
 			);
+
 			//insertDualQuatForBone(theNewBoneElement, DUALQUAARRAY(q));
 
+			//oxyde::exporter::log::insertBonesForSkin(i, theBoneNode->GetName());
+			
+			//oxyde::DQ::dualQuat skinPoseFloat = { DUALQUAARRAY(q) };
+			//oxyde::exporter::log::insertSkinPosesForBones(i, skinPoseFloat);
 		}
 	}
 
 	//////////////////////////////////////    The skin vertices loop
+	//oxyde::exporter::log::startBuildingAdjacentBonesForBone();
 
 	for (int i = 0; i < numVertices; i++){
 		int numBonesForVertex = theSkinContextData->GetNumAssignedBones(i);
@@ -122,13 +140,16 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 		//IXMLDOMElement* theVertexNode = insertVertexForSkin(skinNode, i, numBonesForVertex);
 
 		//////////////////////////////////////    bone weights per skin vertex loop
+		//std::set<int> boneIndexesForVertex = std::set<int>();
 
 		for (int j = 0; j < numBonesForVertex; j++){
 			int boneIndexInSkin = theSkinContextData->GetAssignedBone(i, j);
 			float boneWeightForVertex = theSkinContextData->GetBoneWeight(i, j);
 			theSkinVertex->addBoneEntry(j, boneIndexInSkin, boneWeightForVertex);
 			//insertBoneEntryForVertex(theVertexNode, j, boneIndexInSkin, boneWeightForVertex);
+			//boneIndexesForVertex.insert(boneIndexInSkin);
 		}
+		//oxyde::exporter::log::insertAdjacentBones(boneIndexesForVertex);
 	}
 	return true;
 }

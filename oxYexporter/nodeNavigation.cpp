@@ -12,6 +12,7 @@
 #include "skinDataExtraction.h"
 #include "processCamera.h"
 #include "debugLog.h"
+#include "auxiliaryLogger.h"
 
 using namespace std;
 
@@ -32,6 +33,9 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 	//oxyde::exporter::XML::oxyCamerasInSceneElementPtr camerasInSceneElement = std::make_shared<oxyde::exporter::XML::oxyCamerasInSceneElement>(theDocument);
 
 	theStack.push(nodePair(theSceneElement, rootNode));
+
+	oxyde::exporter::log::startBuildingNodeObjectsForBone();
+	oxyde::exporter::log::startLocalTransformForNodes();
 
 	while(!theStack.empty()){
 		nodePair thePair = theStack.top();
@@ -78,4 +82,10 @@ void visitNodes(INode* rootNode, TimeValue t, oxyde::exporter::XML::oxyDocumentP
 	oxyde::exporter::camera::exportAllCameras(theDocument, cameraNodes);
 
 	oxyde::exporter::skin::skinObjectsList::buildSkinObjectsInList(theDocument);
+
+	//oxyde::exporter::log::startBuildingBoneGraphAdjacencyMap();
+
+	//oxyde::exporter::log::processSkinPoseWithLocalTransform(rootNode);
+
+	oxyde::exporter::log::printBoneGraphAdjacencyMap();
 }

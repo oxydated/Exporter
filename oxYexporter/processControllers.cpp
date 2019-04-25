@@ -4,6 +4,16 @@
 #include "controllerDataExtractor.h"
 #include <maxscript/foundation/numbers.h>
 #include "xmlDocumentAnimation.h"
+#include "auxiliaryLogger.h"
+
+namespace {
+	int getIntAttributeFromElement(const MSXML2::IXMLDOMElementPtr &theElement, _bstr_t attribName)
+	{
+		_variant_t&& intVariant = theElement->getAttribute(attribName);
+		intVariant.ChangeType(VT_I4);
+		return intVariant.intVal;
+	}
+}
 
 static _TCHAR theString[100] = TEXT("");
 static int indent = 1;
@@ -21,6 +31,9 @@ void getControllerInformation(INode* theNode, oxyde::exporter::XML::oxyNodeEleme
 		/// Controller Extractor Test
 		auto theControllerExtractor = oxyde::exporter::controller::controllerDataExtractor::buildExtractorAndSetCurrentNode(theTMControl, theNode);
 		theControllerExtractor->exportController(theAnimationElement);
+
+		int nodeObject = getIntAttributeFromElement(theNodeElement->getXMLDOMElement(), L"nodeObject");
+		oxyde::exporter::log::insertNodeObjectAndName(nodeObject, theNode->GetName());
 
 	}
 }

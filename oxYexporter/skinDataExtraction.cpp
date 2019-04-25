@@ -26,9 +26,12 @@ namespace oxyde {
 
 			std::map<INodePtr, dualQuat> skinPoseCorrector::nodeToLocalTransformDict;
 
-			skinPoseCorrector::skinPoseCorrector(ISkin* theSkinInterface) {
+			skinPoseCorrector::skinPoseCorrector(ISkin* theSkinInterface, INodePtr theSkinNode) {
 				int numBones = theSkinInterface->GetNumBones();
 				oxyde::log::printText(L"skinPoseConversion = Association[{");
+
+				oxyde::exporter::log::startBuildingBonesForSkin();
+				oxyde::exporter::log::startSkinPosesForBones();
 
 				for (int i = 0; i < numBones; i++) {
 					INodePtr theBoneNode = theSkinInterface->GetBone(i);
@@ -50,6 +53,11 @@ namespace oxyde {
 					oxyde::math::getDualQuaternionFromMatrix(m.data(), qs, qx, qy, qz, dqs, dqx, dqy, dqz);
 					nodeToSkinPoseDict[theBoneNode] = { qs, qx, qy, qz, dqs, dqx, dqy, dqz };
 
+					oxyde::DQ::dualQuat skinPoseFloat = { DUALQUAARRAY(nodeToSkinPoseDict[theBoneNode]) };
+
+					oxyde::exporter::log::insertSkinPosesForBones(i, skinPoseFloat);
+					oxyde::exporter::log::insertBonesForSkin(i, theBoneNode->GetName());
+
 					float mFloat[] = { m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15] };
 					
 					oxyde::log::printText(std::to_wstring(i) + L" -> {");
@@ -62,79 +70,128 @@ namespace oxyde {
 
 				oxyde::log::printText(L"}]");
 
+				/////////////	building the vertex sharing bone graph (edges connect bones that share influenced vertices)
+				ISkinContextData* theSkinContextData = theSkinInterface->GetContextInterface(theSkinNode);
+
+				oxyde::exporter::log::startBuildingAdjacentBonesForBone();
+
+				for (int i = 0; i <  theSkinContextData->GetNumPoints(); i++) {
+					int numBonesForVertex = theSkinContextData->GetNumAssignedBones(i);
+
+					//////////////////////////////////////    bone weights per skin vertex loop
+					std::set<int> boneIndexesForVertex = std::set<int>();
+
+					for (int j = 0; j < numBonesForVertex; j++) {
+						int boneIndexInSkin = theSkinContextData->GetAssignedBone(i, j);
+						//float boneWeightForVertex = theSkinContextData->GetBoneWeight(i, j);
+
+						boneIndexesForVertex.insert(boneIndexInSkin);
+					}
+					oxyde::exporter::log::insertAdjacentBones(boneIndexesForVertex);
+				}
+				///////////////////////////////////////////////////////////////////
+
+
 				INodePtr sceneRoot = skinObjectsList::getRootNodeForScene();
 
-				std::stack<INodePtr> theStack;
+				//std::stack<INodePtr> theStack;
 
-				theStack.push(sceneRoot);
+				//theStack.push(sceneRoot);
 
-				INodePtr skeletonRoot = nullptr;
+				//INodePtr skeletonRoot = nullptr;
 
-				while (!theStack.empty()) {
-					INodePtr topNode = theStack.top();
-					theStack.pop();
+				//while (!theStack.empty()) {
+				//	INodePtr topNode = theStack.top();
+				//	theStack.pop();
 
-					oxyde::log::printText(topNode->GetName());
+				//	oxyde::log::printText(topNode->GetName());
 
-					if (!skeletonRoot) {
-						if (nodeToSkinPoseDict.find(topNode) != nodeToSkinPoseDict.end()) {
-							skeletonRoot = topNode;
-							nodeToGlobalTransformDict[skeletonRoot] = nodeToLocalTransformDict[skeletonRoot];
+				//	if (!skeletonRoot) {
+				//		if (nodeToSkinPoseDict.find(topNode) != nodeToSkinPoseDict.end()) {
+				//			skeletonRoot = topNode;
+				//			nodeToGlobalTransformDict[skeletonRoot] = nodeToLocalTransformDict[skeletonRoot];
 
-							oxyde::log::printNamedParameter(L"SkeletonRoot", topNode->GetName());
-						}
-					}
-					else {
-						dualQuatFloat localTransform = { DUALQUAARRAY(nodeToLocalTransformDict[topNode]) };
-						dualQuatFloat parentGlobalTransform = { DUALQUAARRAY(nodeToGlobalTransformDict[topNode->GetParentNode()]) };
-						dualQuatFloat boneGlobalTransform;
+				//			oxyde::log::printNamedParameter(L"SkeletonRoot", topNode->GetName());
+				//		}
+				//	}
+				//	else {
+				//		dualQuatFloat localTransform = { DUALQUAARRAY(nodeToLocalTransformDict[topNode]) };
+				//		dualQuatFloat parentGlobalTransform = { DUALQUAARRAY(nodeToGlobalTransformDict[topNode->GetParentNode()]) };
+				//		dualQuatFloat boneGlobalTransform;
 
-						oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(parentGlobalTransform),
-							DUALQUAARRAY(localTransform),
-							DUALQUAARRAY(boneGlobalTransform));
+				//		oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(parentGlobalTransform),
+				//			DUALQUAARRAY(localTransform),
+				//			DUALQUAARRAY(boneGlobalTransform));
 
-						nodeToGlobalTransformDict[topNode] = { DUALQUAARRAY(boneGlobalTransform) };
+				//		nodeToGlobalTransformDict[topNode] = { DUALQUAARRAY(boneGlobalTransform) };
 
-						if (nodeToSkinPoseDict.find(topNode) != nodeToSkinPoseDict.end() && nodeToSkinPoseDict.find(topNode->GetParentNode()) != nodeToSkinPoseDict.end()) {
-							dualQuatFloat skinPose = { DUALQUAARRAY(nodeToSkinPoseDict[topNode]) };
-							dualQuatFloat transformedFromSkin;
-							dualQuatFloat skinPoseParent = { DUALQUAARRAY(nodeToSkinPoseDict[topNode->GetParentNode()]) };
-							dualQuatFloat transformedFromSkinParent;
+				//		if (nodeToSkinPoseDict.find(topNode) != nodeToSkinPoseDict.end() && nodeToSkinPoseDict.find(topNode->GetParentNode()) != nodeToSkinPoseDict.end()) {
+				//			dualQuatFloat skinPose = { DUALQUAARRAY(nodeToSkinPoseDict[topNode]) };
+				//			dualQuatFloat transformedFromSkin;
+				//			dualQuatFloat skinPoseParent = { DUALQUAARRAY(nodeToSkinPoseDict[topNode->GetParentNode()]) };
+				//			dualQuatFloat transformedFromSkinParent;
 
-							oxyde::DQ::transformFromSourceToDestinationAxis(DUALQUAARRAY(skinPose), DUALQUAARRAY(boneGlobalTransform), DUALQUAARRAY(transformedFromSkin));
+				//			//fromSkintoGlobalChild =
+				//			//	Expand[MultiQuat[globalChild, ConjugateQuat[skinposeChild]]];
 
-							oxyde::DQ::transformFromSourceToDestinationAxis(DUALQUAARRAY(skinPoseParent), DUALQUAARRAY(parentGlobalTransform), DUALQUAARRAY(transformedFromSkinParent));
+				//			oxyde::DQ::transformFromSourceToDestinationAxis(DUALQUAARRAY(skinPose), DUALQUAARRAY(boneGlobalTransform), DUALQUAARRAY(transformedFromSkin));
 
-							//fromSkinToGlobalLocal =
-							//	Expand[MultiQuat[ConjugateQuat[fromSkintoGlobalParent],
-							//	fromSkintoGlobalChild]];
-							//Sign[flattenQuat[fromSkinToGlobalLocal][[1]]]) &
+				//			//fromSkintoGlobalParent =
+				//			//	Expand[MultiQuat[globalParent, ConjugateQuat[skinposeParent]]];
 
-							dualQuatFloat transformedFromSkinParentConj;
-							dualQuatFloat transformFromParentToChild;
+				//			oxyde::DQ::transformFromSourceToDestinationAxis(DUALQUAARRAY(skinPoseParent), DUALQUAARRAY(parentGlobalTransform), DUALQUAARRAY(transformedFromSkinParent));
 
-							DUALQUAVAR(conjSource);
-							oxyde::DQ::dual_quaternion_conjugate(DUALQUAARRAY(transformedFromSkinParent), DUALQUAARRAY(transformedFromSkinParentConj));
+				//			//fromSkinToGlobalLocal =
+				//			//	Expand[MultiQuat[ConjugateQuat[fromSkintoGlobalParent],
+				//			//	fromSkintoGlobalChild]];
 
-							oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(transformedFromSkinParentConj), DUALQUAARRAY(transformedFromSkin), DUALQUAARRAY(transformFromParentToChild));
+				//			//Sign[flattenQuat[fromSkinToGlobalLocal][[1]]]) &
 
-							if (transformFromParentToChild[0] < 0.) {
-								dualQuat complQuat = nodeToSkinPoseDict[topNode];
-								nodeToSkinPoseDict[topNode] = { -complQuat[0], -complQuat[1], -complQuat[2], -complQuat[3], -complQuat[4], -complQuat[5], -complQuat[6], -complQuat[7] };
+				//			dualQuatFloat transformedFromSkinParentConj;
+				//			dualQuatFloat transformFromParentToChild;
 
-								oxyde::log::printNamedParameter(L"Signal inverted: ", topNode->GetName());
-							}
-						}
+				//			DUALQUAVAR(conjSource);
+				//			oxyde::DQ::dual_quaternion_conjugate(DUALQUAARRAY(transformedFromSkinParent), DUALQUAARRAY(transformedFromSkinParentConj));
 
-					}
+				//			oxyde::DQ::dual_quaternion_product(DUALQUAARRAY(transformedFromSkinParentConj), DUALQUAARRAY(transformedFromSkin), DUALQUAARRAY(transformFromParentToChild));
 
-					int numChildren = topNode->NumberOfChildren();
-					for (int i = 0; i < numChildren; i++) {
+				//			if (transformFromParentToChild[0] < 0.) {
+				//				dualQuat complQuat = nodeToSkinPoseDict[topNode];
+				//				nodeToSkinPoseDict[topNode] = { -complQuat[0], -complQuat[1], -complQuat[2], -complQuat[3], -complQuat[4], -complQuat[5], -complQuat[6], -complQuat[7] };
 
-						INodePtr child = topNode->GetChildNode(i);
-						theStack.push(child);
-					}
+				//				oxyde::log::printNamedParameter(L"Signal inverted: ", topNode->GetName());
+				//			}
+				//		}
+
+				//	}
+
+				//	int numChildren = topNode->NumberOfChildren();
+				//	for (int i = 0; i < numChildren; i++) {
+
+				//		INodePtr child = topNode->GetChildNode(i);
+				//		theStack.push(child);
+				//	}
+				//}
+
+				//////////////////////////////////////////////////////
+
+				oxyde::exporter::log::startBuildingBoneGraphAdjacencyMap();
+
+				oxyde::exporter::log::processSkinPoseWithLocalTransform(sceneRoot);
+
+				for (auto &&thePair : nodeToSkinPoseDict) {
+					oxyde::DQ::dualQuat newSkinPoseValue = oxyde::exporter::log::getFinalSkinPoseForBoneName(thePair.first->GetName());
+					thePair.second[0] = newSkinPoseValue[0];
+					thePair.second[1] = newSkinPoseValue[1];
+					thePair.second[2] = newSkinPoseValue[2];
+					thePair.second[3] = newSkinPoseValue[3];
+					thePair.second[4] = newSkinPoseValue[4];
+					thePair.second[5] = newSkinPoseValue[5];
+					thePair.second[6] = newSkinPoseValue[6];
+					thePair.second[7] = newSkinPoseValue[7];
 				}
+
+				//////////////////////////////////////////////////////
 
 				for (auto i = nodeToSkinPoseDict.begin(); i != nodeToSkinPoseDict.end(); ++i) {
 					oxyde::log::printNamedParameter(L"boneNode", i->first->GetName());

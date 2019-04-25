@@ -13,6 +13,7 @@ namespace oxyde {
 			}
 
 			oxySkinElementPtr oxySkinElement::createSkinElement(oxyObjectListPtr theObjectList, std::wstring inputSkinNodeName, int inputMesh,
+				INodePtr theSkinNode,
 				int inputnumBones,
 				int inputnumVertices,
 				float inr0c0, float inr0c1, float inr0c2,
