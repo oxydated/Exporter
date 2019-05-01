@@ -1343,7 +1343,7 @@ namespace {
 			oxyde::exporter::controller::rotationControllerDataExtractor::registerMe();
 			oxyde::exporter::controller::bipSlaveControllerDataExtractor::registerMe();
 			oxyde::exporter::controller::bipBodyControllerDataExtractor::registerMe();
-			//oxyde::exporter::controller::lookAtcontrollerDataExtractor::registerMe();
+			oxyde::exporter::controller::lookAtcontrollerDataExtractor::registerMe();
 		}
 	};
 

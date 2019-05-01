@@ -80,13 +80,20 @@ namespace oxyde {
 			void printBoneGraphAdjacencyMap()
 			{
 				std::wstringstream animStream;
+
 				animStream << std::fixed;
 				//	"{1 <->    3, 3 <->   5, 5 ->  2, 2 <->  3}"
 				animStream << L"{ ";
 				for (auto &&thePair : boneGraphAdjacencyMap) {
 					animStream << std::to_wstring(thePair.first) << L" <-> " << std::to_wstring(thePair.second) << ", ";
 				}
-				animStream << L"}";
+				animStream << L"}" << std::endl << std::endl;
+
+				animStream << L"{ ";
+				for (auto &&thePair : nodeGraphAdjacencyMap) {
+					animStream << std::to_wstring(thePair.first) << L" <-> " << std::to_wstring(thePair.second) << ", ";
+				}
+				animStream << L"}" << std::endl;
 
 				oxyde::log::printText(animStream.str());
 			}
@@ -121,15 +128,39 @@ namespace oxyde {
 
 				std::map<std::wstring, oxyde::DQ::dualQuat> globalTransformForNodeName = std::map<std::wstring, oxyde::DQ::dualQuat>();
 
+				std::map<int, int> mapNodeObjectToDepth = std::map<int, int>();
+
 				globalTransformForNodeName[sceneRootNode->GetName()] = { 1.,0. ,0. ,0. ,0. ,0. ,0. ,0. };
 
-				std::stack<INodePtr> nodeStack = std::stack<INodePtr>();
+				//std::stack<INodePtr> nodeStack = std::stack<INodePtr>();
+				std::stack<std::pair<INodePtr, int>> nodeStack = std::stack<std::pair<INodePtr, int>>();
 				
-				nodeStack.push(sceneRootNode);
+				nodeStack.push(std::pair<INodePtr, int>(sceneRootNode, 0));
+
+				std::vector<std::pair<int, int>> nodeHierarchyGraph = std::vector<std::pair<int, int>>();
+				
+				oxyde::log::printText(L"Building hierarchy");
+				std::wstringstream animStream;
+				animStream << std::fixed;
+
+				animStream << L"{ ";
+
+				std::map<int, int> parentForNode = std::map<int, int>();
+				parentForNode[nodeObjectsByName[sceneRootNode->GetName()]] = -1;
+
+				std::vector<int> nodeSequence = std::vector<int>();
 
 				while (!nodeStack.empty()) {
-					INodePtr topNode = nodeStack.top();
+					std::pair<INodePtr, int> pairOnTop = nodeStack.top();
+					INodePtr topNode = pairOnTop.first;
+					int topNodeDepth = pairOnTop.second;
+
+					mapNodeObjectToDepth[nodeObjectsByName[topNode->GetName()]] = topNodeDepth;
+
 					nodeStack.pop();
+
+					animStream << std::to_wstring(nodeObjectsByName[topNode->GetName()]) << L", ";
+					nodeSequence.push_back(nodeObjectsByName[topNode->GetName()]);
 
 					for (int i = 0; i < topNode->NumChildren(); i++) {
 						INodePtr child = topNode->GetChildNode(i);
@@ -141,19 +172,127 @@ namespace oxyde {
 
 						globalTransformForNodeName[child->GetName()] = boneGlobalTransform;
 
-						nodeStack.push(child);
+						nodeHierarchyGraph.push_back(std::pair<int, int>(nodeObjectsByName[topNode->GetName()], nodeObjectsByName[child->GetName()]));
+
+						nodeStack.push(std::pair<INodePtr, int>(child, topNodeDepth + 1));
+						parentForNode[nodeObjectsByName[child->GetName()]] = nodeObjectsByName[topNode->GetName()];
 					}
 				}
+				animStream << L"}" << std::endl << std::endl;
+
+				oxyde::log::printText(animStream.str());
+
+				///////////////////////////////// Hierarchy Graph
+
+				oxyde::log::printText(L"Hierarchy Graph");
+
+				animStream = std::wstringstream(std::wstring());
+
+				//	"{1 <->    3, 3 <->   5, 5 ->  2, 2 <->  3}"
+				animStream << L"{ ";
+				for (auto &&thePair : nodeHierarchyGraph) {
+					animStream << std::to_wstring(thePair.first) << L" -> " << std::to_wstring(thePair.second) << ", ";
+				}
+				animStream << L"}" << std::endl << std::endl;
+
+				oxyde::log::printText(animStream.str());
+
+				/////////////////////////////////////////////////
 
 				std::map<int, oxyde::DQ::dualQuat> globalTransformationForNodeObject = std::map<int, oxyde::DQ::dualQuat>();
 				for (auto &&thePair : globalTransformForNodeName) {
 					globalTransformationForNodeObject[nodeObjectsByName[thePair.first]] = thePair.second;
 				}
 
-				///////////////////////
+				auto compareKeys = [&](const std::pair<int, int> &a, const std::pair<int, int> &b) -> bool {
+					return std::pair<int, int>(mapNodeObjectToDepth[a.first], mapNodeObjectToDepth[a.second]) < std::pair<int, int>(mapNodeObjectToDepth[b.first], mapNodeObjectToDepth[b.second]) ? true :
+						(std::pair<int, int>(mapNodeObjectToDepth[a.first], mapNodeObjectToDepth[a.second]) > std::pair<int, int>(mapNodeObjectToDepth[b.first], mapNodeObjectToDepth[b.second]) ? false : a < b);
+				};
+
+				//auto nodeGraphAdjacencyMapSortedByDepth = std::set<std::pair<int, int>, decltype(compareKeys)>(compareKeys);
+				auto nodeGraphAdjacencyMapSortedByDepth = std::vector<std::pair<int, int>>();
+
 				for (auto &&theEdge : nodeGraphAdjacencyMap) {
+					nodeGraphAdjacencyMapSortedByDepth.push_back(
+						std::pair<int, int>(
+							mapNodeObjectToDepth[theEdge.first] < mapNodeObjectToDepth[theEdge.second] ? theEdge.first : 
+							(mapNodeObjectToDepth[theEdge.first] > mapNodeObjectToDepth[theEdge.second] ? theEdge.second: (theEdge.first < theEdge.second ? theEdge.first: theEdge.second)),
+							mapNodeObjectToDepth[theEdge.first] < mapNodeObjectToDepth[theEdge.second] ? theEdge.second :
+							(mapNodeObjectToDepth[theEdge.first] > mapNodeObjectToDepth[theEdge.second] ? theEdge.first: (theEdge.first < theEdge.second ? theEdge.second: theEdge.first))
+							)
+					);
+					//(std::pair<int, int>(min(nodeObject_i, nodeObject_j), max(nodeObject_i, nodeObject_j)));
+				}
+				std::sort(nodeGraphAdjacencyMapSortedByDepth.begin(), nodeGraphAdjacencyMapSortedByDepth.end(), compareKeys);
+
+				///////////////////////////////// Node Graph by depth
+
+				oxyde::log::printText(L"Node Graph by depth");
+
+				animStream = std::wstringstream(std::wstring());
+
+				animStream << std::fixed;
+				//	"{1 <->    3, 3 <->   5, 5 ->  2, 2 <->  3}"
+				animStream << L"{ ";
+				for (auto &&thePair : nodeGraphAdjacencyMapSortedByDepth) {
+					animStream << std::to_wstring(thePair.first) << L" -> " << std::to_wstring(thePair.second) << ", ";
+				}
+				animStream << L"}" << std::endl << std::endl;
+
+				oxyde::log::printText(animStream.str());
+
+				/////////////////////////////////////////////////
+
+				///////////////////////
+
+				oxyde::log::printText(L"Global Transformation and Skinpose BEFORE");
+
+				oxyde::log::printText(L"{ ");
+
+				for (auto &&thePair : bonesForSkin) {
+					std::wstringstream animStream;
+					animStream << std::fixed;
+
+					animStream << L"{ ";
+					animStream << L"\"" << thePair.second << L"\", ";
+					animStream << thePair.first << L", ";
+					animStream << nodeObjectsByName[thePair.second] << L", ";
+					oxyde::DQ::dualQuat &q = globalTransformForNodeName[thePair.second];
+					animStream << L"{" << q[0] << L"," << q[1] << L"," << q[2] << L"," << q[3] << L"," << q[4] << L"," << q[5] << L"," << q[6] << L"," << q[7] << L"}.dualQuatUnit, ";
+					oxyde::DQ::dualQuat &g = skinPosesForBones[thePair.first];
+					animStream << L"{" << g[0] << L"," << g[1] << L"," << g[2] << L"," << g[3] << L"," << g[4] << L"," << g[5] << L"," << g[6] << L"," << g[7] << L"}.dualQuatUnit ";
+					animStream << L"}, ";
+
+					oxyde::log::printText(animStream.str());
+				}
+				oxyde::log::printText(L"}");
+				///////////////////////////////////////
+
+				///////////////////////
+				
+				oxyde::log::printText(L"Running algorithm");
+
+				animStream = std::wstringstream(std::wstring());
+
+				animStream << std::fixed;
+
+				animStream << L"{ ";
+
+				for (auto &&theEdge : nodeGraphAdjacencyMapSortedByDepth) {
+
+				//for (auto &&theEdge : nodeHierarchyGraph) {
 					int theParent = theEdge.first;
 					int theChild = theEdge.second;
+
+				//for (const int &theNode : nodeSequence) {
+				//	int theParent = parentForNode[theNode];
+				//	int theChild = theNode;
+
+					
+					animStream << std::to_wstring(theChild) << L" [" << std::to_wstring(theParent) << L"]" << L", ";
+
+					if (nodeObjectToBoneTranslationMap.find(theChild) == nodeObjectToBoneTranslationMap.end() || nodeObjectToBoneTranslationMap.find(theParent) == nodeObjectToBoneTranslationMap.end())
+						continue;
 
 					oxyde::DQ::dualQuat transformedFromSkin;
 					oxyde::DQ::dualQuat transformedFromSkinParent;
@@ -202,9 +341,13 @@ namespace oxyde {
 					}
 
 				}
+
+				animStream << L"}" << std::endl << std::endl;
+
+				oxyde::log::printText(animStream.str());
 				///////////////////////
 
-				oxyde::log::printText(L"Global Transformation and Skinpose");
+				oxyde::log::printText(L"Global Transformation and Skinpose AFTER");
 
 				oxyde::log::printText(L"{ ");
 
@@ -225,6 +368,7 @@ namespace oxyde {
 					oxyde::log::printText(animStream.str());
 				}
 				oxyde::log::printText(L"}");
+				///////////////////////////////////////
 
 			}
 

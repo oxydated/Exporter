@@ -91,7 +91,7 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 	//oxyde::exporter::log::startSkinPosesForBones();
 
 	//std::set<int> toInvert{ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,17,18,19,20,21,23,26,27,28,29,31,36,37,39,42,50,52,58,67,90,98,149 };
-	std::set<int> toInvert{ 0, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 23, 26, 27, 28, 29, 31, 36, 37, 39, 42, 50, 52, 58, 67, 90, 98, 149 };
+	//std::set<int> toInvert{ 0, 2, 3, 4, 5, 7, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 23, 26, 27, 28, 29, 31, 36, 37, 39, 42, 50, 52, 58, 67, 90, 98, 149 };
 	//std::set<int> toInvert{1, 6, 8};
 
 	for (int i = 0; i < numBones; i++) {
@@ -108,9 +108,9 @@ bool extractSkinDataFromObj(IDerivedObject* theDerivedObj, INode* theNode, _TCHA
 			oxyde::log::printLine();
 
 			oxyde::log::printDualQuat(L"DualQuatforBoneQ", DUALQUAARRAY(q));
-			if (toInvert.find(i) != toInvert.end()) {
-				q[0] = -q[0]; q[1] = -q[1]; q[2] = -q[2]; q[3] = -q[3]; q[4] = -q[4]; q[5] = -q[5]; q[6] = -q[6]; q[7] = -q[7];
-			}
+			//if (toInvert.find(i) != toInvert.end()) {
+			//	q[0] = -q[0]; q[1] = -q[1]; q[2] = -q[2]; q[3] = -q[3]; q[4] = -q[4]; q[5] = -q[5]; q[6] = -q[6]; q[7] = -q[7];
+			//}
 
 			theSkinElement->addBone((_TCHAR*)theBoneNode->GetName(), i,
 				theMatrix.GetRow(0).x, theMatrix.GetRow(0).y, theMatrix.GetRow(0).z,

@@ -175,6 +175,15 @@ namespace oxyde {
 
 				//////////////////////////////////////////////////////
 
+				oxyde::log::printText(L"Before correction");
+
+				for (auto i = nodeToSkinPoseDict.begin(); i != nodeToSkinPoseDict.end(); ++i) {
+					oxyde::log::printNamedParameter(L"boneNode", i->first->GetName());
+					oxyde::log::printDualQuat(L"SkinPose", DUALQUAARRAY(i->second));
+				}
+
+				//////////////////////////////////////////////////////
+
 				oxyde::exporter::log::startBuildingBoneGraphAdjacencyMap();
 
 				oxyde::exporter::log::processSkinPoseWithLocalTransform(sceneRoot);
@@ -192,6 +201,8 @@ namespace oxyde {
 				}
 
 				//////////////////////////////////////////////////////
+
+				oxyde::log::printText(L"After correction");
 
 				for (auto i = nodeToSkinPoseDict.begin(); i != nodeToSkinPoseDict.end(); ++i) {
 					oxyde::log::printNamedParameter(L"boneNode", i->first->GetName());
