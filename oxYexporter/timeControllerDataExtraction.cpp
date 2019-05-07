@@ -424,8 +424,13 @@ namespace oxyde {
 					formerMatrix[15] = m[15];
 				}
 
+				bool repeatQuat = false;
 				if (keyTimes.size() == 1) {
-					intervals.push_back(std::pair<dualQuatKey, dualQuatKey>(formerValue, formerValue));
+					//intervals.push_back(std::pair<dualQuatKey, dualQuatKey>(formerValue, formerValue));
+
+					TimeValue endTime = GetAnimEnd();
+					intervals.push_back(std::pair<dualQuatKey, dualQuatKey>(formerValue, dualQuatKey(endTime, formerValue.second)));
+					repeatQuat = true;
 				}
 
 				oxyde::log::printLine();
@@ -576,7 +581,8 @@ namespace oxyde {
 
 					float transQSanityCheck[8];
 
-					if (pair.first.first != pair.second.first) {
+					//if (pair.first.first != pair.second.first) {
+					if (!repeatQuat) {
 
 						//insertDualQuatKeyForTrack(theDualQuatTrackElement,
 						//	pair.first.first, pair.second.first,
